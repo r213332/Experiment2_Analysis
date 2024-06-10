@@ -9,7 +9,7 @@ classdef Velocity
     
     methods
         % コンストラクタ
-        function obj = RT(name,control, near, far)
+        function obj = Velocity(name,control, near, far)
             % 引数のバリデーション
             if nargin == 4
                 obj.name = name;
@@ -18,7 +18,6 @@ classdef Velocity
                 obj.control = rmmissing(control{:, 1});
                 obj.near = rmmissing(near{:, 1});
                 obj.far = rmmissing(far{:, 1});
-                obj.dataNum = height(control);
             else
                 error('Arguments for control, near, and fara are required');
             end

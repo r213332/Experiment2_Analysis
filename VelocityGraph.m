@@ -5,8 +5,8 @@ subdirs = subdirs([subdirs.isdir]);  % ディレクトリのみを取得
 subdirs = subdirs(~ismember({subdirs.name}, {'.', '..'}));  % '.'と'..'を除外
 
 % RTクラスの配列を宣言
-subjects = RT.empty(length(subdirs)+1, 0);
-all = RT.empty(1, 0);
+subjects = Velocity.empty(length(subdirs)+1, 0);
+all = Velocity.empty(1, 0);
 
 % 各サブディレクトリに対してRTクラスのインスタンスを作成
 for i = 1:length(subdirs)
@@ -18,9 +18,9 @@ for i = 1:length(subdirs)
     far = readtable(fullfile(directory, subdirName, "farVelocity.csv"));
     
     % RTクラスのインスタンスを作成
-    subjects(i) = RT(subdirName,control, near, far);
+    subjects(i) = Velocity(subdirName,control, near, far);
     if(i == 1)
-        all = RT('All',control, near, far);
+        all = Velocity('All',control, near, far);
     else
         all = all.addData(control, near, far);
     end
@@ -30,6 +30,7 @@ subjects(length(subdirs)+1) = all;
 
 % 各データを棒グラフで中央値を表示
 Median = zeros(length(subjects), 3);
+Mean = zeros(length(subjects), 3);
 error = zeros(length(subjects), 3);
 
 for i = 1:length(subjects)
@@ -38,6 +39,11 @@ for i = 1:length(subjects)
     Median(i,1) = controlMedian;
     Median(i,2) = nearMedian;
     Median(i,3) = farMedian;
+
+    [controlMean, nearMean, farMean] = subject.getMeans();
+    Mean(i,1) = controlMean;
+    Mean(i,2) = nearMean;
+    Mean(i,3) = farMean;
     
     [controlQuantilesError, nearQuantilesError, farQuantilesError] = subject.getQuantilesError();
     error(i,1) = controlQuantilesError;
@@ -110,7 +116,7 @@ xticklabels(subjectNames);
 % グラフを保存
 graphDir = './graphs';
 mkdir(graphDir);
-saveas(gcf, fullfile(graphDir, 'Velocity_Graph.png'));
+saveas(gcf, fullfile(graphDir, 'Velocity_Graph_Median.png'));
 
 % allのクラスカルワリス及び各条件でのウィルコクソン順位和検定
 all = subjects(length(subdirs)+1);

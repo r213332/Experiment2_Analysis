@@ -53,19 +53,89 @@ end
 figure;
 b = bar(Median);
 hold on;
-% p値の表示
-xtips = b(2).XEndPoints;
+% 検定結果のp値の表示
 control_y = b(1).YEndPoints;
 near_y = b(2).YEndPoints;
 far_y = b(3).YEndPoints;
-ytips = max([control_y;near_y; far_y]) + 0.5;
-% labels = [strcat("p=",string(subject1_p)), strcat("p=",string(subject2_p)), strcat("p=",string(subject3_p)), strcat("p=",string(subject4_p)), strcat("p=",string(all_p))];
+ytips = max([control_y;near_y; far_y]);
+% 対照条件と近接条件
+xStart = b(1).XEndPoints;
+xEnd = b(2).XEndPoints;
+yStep = 0.3;
 labels = strings(length(subjects),1);
 for i = 1:length(subjects)
     subject = subjects(i);
-    labels(i) = strcat("p=",string(subject.kruskalwallis()));
+    p = subject.kruskalwallis();
+    if(p < 0.05)
+        [C_N_P,C_F_P,N_F_P] = subject.ranksum();
+        label = "n.s.";
+        if(C_N_P < 0.05)
+            label = "*";
+        end
+        if(C_N_P < 0.01)
+            label = "**";
+        end
+        labels(i) = label;
+    else
+        xStart(i) = xEnd(i);
+        labels(i) = "";
+    end
 end
-text(xtips, ytips, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
+line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k');
+text((xStart + xEnd)./2, ytips+yStep, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
+
+% 対照条件と遠方条件
+xStart = b(1).XEndPoints;
+xEnd = b(3).XEndPoints;
+yStep = 0.4;
+labels = strings(length(subjects),1);
+for i = 1:length(subjects)
+    subject = subjects(i);
+    p = subject.kruskalwallis();
+    if(p < 0.05)
+        [C_N_P,C_F_P,N_F_P] = subject.ranksum();
+        label = "n.s.";
+        if(C_F_P < 0.05)
+            label = "*";
+        end
+        if(C_F_P < 0.01)
+            label = "**";
+        end
+        labels(i) = label;
+    else
+        xStart(i) = xEnd(i);
+        labels(i) = "";
+    end
+end
+line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k');
+text((xStart + xEnd)./2, ytips+yStep, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
+
+% 近接条件と遠方条件
+xStart = b(2).XEndPoints;
+xEnd = b(3).XEndPoints;
+yStep = 0.35;
+labels = strings(length(subjects),1);
+for i = 1:length(subjects)
+    subject = subjects(i);
+    p = subject.kruskalwallis();
+    if(p < 0.05)
+        [C_N_P,C_F_P,N_F_P] = subject.ranksum();
+        label = "n.s.";
+        if(N_F_P < 0.05)
+            label = "*";
+        end
+        if(N_F_P < 0.01)
+            label = "**";
+        end
+        labels(i) = label;
+    else
+        xStart(i) = xEnd(i);
+        labels(i) = "";
+    end
+end
+line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k');
+text((xStart + xEnd)./2, ytips+yStep, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
+
 
 % エラーバーの描画
 [ngroups,nbars] = size(Median);
