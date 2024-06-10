@@ -1,4 +1,4 @@
-% PDTRTのクラス
+% Velocityのクラス
 classdef Velocity
     properties
         name
@@ -19,7 +19,7 @@ classdef Velocity
                 obj.near = rmmissing(near{:, 1});
                 obj.far = rmmissing(far{:, 1});
             else
-                error('Arguments for control, near, and fara are required');
+                error('Arguments for control, near, and far are required');
             end
         end
 

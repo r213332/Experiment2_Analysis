@@ -28,7 +28,7 @@ classdef RT
                 obj.far = rmmissing(far{:, 1});
                 obj.dataNum = height(control);
             else
-                error('Arguments for control, near, and fara are required');
+                error('Arguments for control, near, and far are required');
             end
         end
 

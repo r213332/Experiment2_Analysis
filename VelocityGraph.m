@@ -55,40 +55,90 @@ end
 figure;
 b = bar(Median);
 hold on;
-% シャピロ・ウィルク検定のp値の表示
-%control
-xtips = b(1).XEndPoints;
-ytips = b(1).YEndPoints + 6;
-% labels = [string(subject1_c_p),string(subject2_c_p),string(subject3_c_p),string(subject4_c_p),string(all_c_p)];
+% 検定結果のp値の表示
+control_y = b(1).YEndPoints;
+near_y = b(2).YEndPoints;
+far_y = b(3).YEndPoints;
+ytips = max([control_y;near_y; far_y]);
+% 対照条件と近接条件
+xStart = b(1).XEndPoints;
+xEnd = b(2).XEndPoints;
+yStep = 5;
 labels = strings(length(subjects),1);
 for i = 1:length(subjects)
     subject = subjects(i);
-    [c_p,n_p,f_p] = subject.swtest();
-    labels(i) = strcat("p=",string(c_p));
+    p = subject.kruskalwallis();
+    disp(subject.name)
+    disp(p);
+    if(p < 0.05)
+        [C_N_P,C_F_P,N_F_P] = subject.ranksum();
+        label = "n.s.";
+        if(C_N_P < 0.05)
+            label = "*";
+        end
+        if(C_N_P < 0.01)
+            label = "**";
+        end
+        labels(i) = label;
+    else
+        xStart(i) = xEnd(i);
+        labels(i) = "";
+    end
 end
-text(xtips, ytips, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom','FontSize',10);
+line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k');
+text((xStart + xEnd)./2, ytips+yStep, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
-%near
-xtips = b(2).XEndPoints;
-ytips = b(1).YEndPoints +  4;
+% 対照条件と遠方条件
+xStart = b(1).XEndPoints;
+xEnd = b(3).XEndPoints;
+yStep = 7;
 labels = strings(length(subjects),1);
 for i = 1:length(subjects)
     subject = subjects(i);
-    [c_p,n_p,f_p] = subject.swtest();
-    labels(i) = strcat("p=",string(n_p));
+    p = subject.kruskalwallis();
+    if(p < 0.05)
+        [C_N_P,C_F_P,N_F_P] = subject.ranksum();
+        label = "n.s.";
+        if(C_F_P < 0.05)
+            label = "*";
+        end
+        if(C_F_P < 0.01)
+            label = "**";
+        end
+        labels(i) = label;
+    else
+        xStart(i) = xEnd(i);
+        labels(i) = "";
+    end
 end
-text(xtips, ytips, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom','FontSize',10);
+line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k');
+text((xStart + xEnd)./2, ytips+yStep, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
-%far
-xtips = b(3).XEndPoints;
-ytips = b(1).YEndPoints + 2;
+% 近接条件と遠方条件
+xStart = b(2).XEndPoints;
+xEnd = b(3).XEndPoints;
+yStep = 6;
 labels = strings(length(subjects),1);
 for i = 1:length(subjects)
     subject = subjects(i);
-    [c_p,n_p,f_p] = subject.swtest();
-    labels(i) = strcat("p=",string(f_p));
+    p = subject.kruskalwallis();
+    if(p < 0.05)
+        [C_N_P,C_F_P,N_F_P] = subject.ranksum();
+        label = "n.s.";
+        if(N_F_P < 0.05)
+            label = "*";
+        end
+        if(N_F_P < 0.01)
+            label = "**";
+        end
+        labels(i) = label;
+    else
+        xStart(i) = xEnd(i);
+        labels(i) = "";
+    end
 end
-text(xtips, ytips, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom','FontSize',10);
+line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k');
+text((xStart + xEnd)./2, ytips+yStep, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
 % エラーバーの描画
 [ngroups,nbars] = size(Median);
@@ -118,17 +168,5 @@ graphDir = './graphs';
 mkdir(graphDir);
 saveas(gcf, fullfile(graphDir, 'Velocity_Graph_Median.png'));
 
-% allのクラスカルワリス及び各条件でのウィルコクソン順位和検定
-all = subjects(length(subdirs)+1);
-all_p = all.kruskalwallis();
-[C_N_P,C_F_P,N_F_P] = all.ranksum();
-disp("allのクラスカルワリス検定p値");
-disp(all_p);
-disp("対照条件と近接条件のウィルコクソン順位和検定p値");
-disp(C_N_P);
-disp("対照条件と遠方条件のウィルコクソン順位和検定p値");
-disp(C_F_P);
-disp("近接条件と遠方条件のウィルコクソン順位和検定p値");
-disp(N_F_P);
 
 
