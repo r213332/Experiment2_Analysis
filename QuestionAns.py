@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 import glob
 import os
 
-subject = "subject4"
+subject = "subject3"
 csvFiles = glob.glob("./data/" + subject + "/*.csv")
 
 AllData = []

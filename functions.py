@@ -34,8 +34,6 @@ def getRT(data:pd.DataFrame):
             if(time < 2.0 and time > 0.2):
                 returnData[-1]['RT'] = time
             show = False
-            
-    print(totalShows)
 
     return returnData
 

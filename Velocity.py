@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 import glob
 import os
 
-subject = "subject4"
+subject = "subject3"
 csvFiles = glob.glob("./data/" + subject + "/*.csv")
 
 AllData = []
@@ -50,3 +50,12 @@ F_w,F_p = shapiro(far)
 print("正規性(対照):p=",C_p)
 print("正規性(近傍):p=",N_p)
 print("正規性(遠方):p=",F_p)
+
+#  Wilcoxonの順位和検定
+CN_wil_all,CN_p_all = mannwhitneyu(control,near,method='exact')
+CF_wil_all,CF_p_all = mannwhitneyu(control,far,method='exact')
+NF_wil_all,NF_p_all = mannwhitneyu(near,far,method='exact')
+
+print("対照:近接",CN_p_all)
+print("対照:遠方",CF_p_all)
+print("近接:遠方",NF_p_all)

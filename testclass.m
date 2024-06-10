@@ -1,16 +1,28 @@
 directory = "./processedData/";
 import RT.*;
 
-% Subject 1
-subject1 = struct();
-subject1.control = readtable("C:\workspace\Experiment1_Analysis\processedData\subject1\controlRT.csv");
-subject1.near = readtable("C:\workspace\Experiment1_Analysis\processedData\subject1\nearRT.csv");
-subject1.far = readtable("C:\workspace\Experiment1_Analysis\processedData\subject1\farRT.csv");
+% ディレクトリ内のすべてのサブディレクトリを取得
+subdirs = dir(directory);
+subdirs = subdirs([subdirs.isdir]);  % ディレクトリのみを取得
+subdirs = subdirs(~ismember({subdirs.name}, {'.', '..'}));  % '.'と'..'を除外
 
-subject1 = RT(subject1.control, subject1.near, subject1.far);
+% RTクラスの配列を宣言
+subjects = RT.empty(length(subdirs), 0);
 
-subject1.control
-subject1.getMissingRate()
+% 各サブディレクトリに対してRTクラスのインスタンスを作成
+for i = 1:length(subdirs)
+    subdirName = subdirs(i).name;
+    
+    % 各CSVファイルを読み込む
+    control = readtable(fullfile(directory, subdirName, "controlRT.csv"));
+    near = readtable(fullfile(directory, subdirName, "nearRT.csv"));
+    far = readtable(fullfile(directory, subdirName, "farRT.csv"));
+    
+    % RTクラスのインスタンスを作成
+    subjects(i) = RT(control, near, far);
+end
+
+[controlMiss,nearMiss,farMiss] = subjects(1).getMissingRate()
 
 
 
