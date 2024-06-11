@@ -13,26 +13,32 @@ def getStimulusShowTimes(data:pd.DataFrame):
     return count
 
 def getRT(data:pd.DataFrame):
-    initialTime = 0.0
+    initialIndex = 1
     show = False
     totalShows = 0
     returnData = []
     for index in range(1,len(data)):
         row = data.iloc[index]
         prev = data.iloc[index-1]
-        time = row['RealTime'] - initialTime
+        time = row['RealTime'] - data.iloc[initialIndex]['RealTime']
         if(prev['ShowStimulus'] == 0 and row['ShowStimulus'] == 1):
             totalShows += 1
-            initialTime = row['RealTime']
+            initialIndex = index
             show = True
             returnData.append({
                 'RT': None,
+                'MeanVelocity': None,
                 'HDegree': row['StimulusHorizontalDegree'], 
                 'VDegree': row['StimulusVerticalDegree'], 
             })
         if(show and prev['IsRightButtonPressed'] == 0 and row['IsRightButtonPressed'] == 1):
             if(time < 2.0 and time > 0.2):
                 returnData[-1]['RT'] = time
+                velocity_sum = 0
+                for j in range(initialIndex,index):
+                    velocity_sum += data.iloc[j]['speed[m/s]']
+                returnData[-1]['MeanVelocity'] = velocity_sum / (index - initialIndex)
+                
             show = False
 
     return returnData

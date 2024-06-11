@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 import glob
 import os
 
-subject = "subject3"
+subject = "subject5"
 csvFiles = glob.glob("./data/" + subject + "/*.csv")
 
 AllData = []
@@ -45,16 +45,19 @@ if not os.path.exists("./processedData/" + subject):
 
 pd.DataFrame({
     'RT': [x['RT'] for x in control],
+    'MeanVelocity': [x['MeanVelocity'] for x in control],
     'HDegree': [x['HDegree'] for x in control],
     'VDegree': [x['VDegree'] for x in control],
 }).to_csv("./processedData/" + subject + '/controlRT.csv', index=False)
 pd.DataFrame({
     'RT': [x['RT'] for x in near],
+    'MeanVelocity': [x['MeanVelocity'] for x in near],
     'HDegree': [x['HDegree'] for x in near],
     'VDegree': [x['VDegree'] for x in near],
 }).to_csv("./processedData/" + subject + '/nearRT.csv', index=False)
 pd.DataFrame({
     'RT': [x['RT'] for x in far],
+    'MeanVelocity': [x['MeanVelocity'] for x in far],
     'HDegree': [x['HDegree'] for x in far],
     'VDegree': [x['VDegree'] for x in far],
 }).to_csv("./processedData/" + subject + '/farRT.csv', index=False)

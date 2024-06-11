@@ -3,3 +3,6 @@
 /data
 /processedData
 /graphs
+/__pycache__
+
+*.pyc
