@@ -41,6 +41,13 @@ classdef Velocity
             farMean = mean(obj.far);
         end
 
+        % 標準偏差取得
+        function [controlStd, nearStd, farStd] = getStds(obj)
+            controlStd = std(obj.control);
+            nearStd = std(obj.near);
+            farStd = std(obj.far);
+        end
+
         % 中央値取得
         function [controlMedian, nearMedian, farMedian] = getMedians(obj)
             controlMedian = median(obj.control);

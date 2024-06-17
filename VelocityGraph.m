@@ -31,7 +31,9 @@ subjects(length(subdirs)+1) = all;
 % 各データを棒グラフで中央値を表示
 Median = zeros(length(subjects), 3);
 Mean = zeros(length(subjects), 3);
-error = zeros(length(subjects), 3);
+std = zeros(length(subjects), 3);
+errorMin = zeros(length(subjects), 3);
+errorMax = zeros(length(subjects), 3);
 
 for i = 1:length(subjects)
     subject = subjects(i);
@@ -45,10 +47,18 @@ for i = 1:length(subjects)
     Mean(i,2) = nearMean;
     Mean(i,3) = farMean;
     
-    [controlQuantilesError, nearQuantilesError, farQuantilesError] = subject.getQuantilesError();
-    error(i,1) = controlQuantilesError;
-    error(i,2) = nearQuantilesError;
-    error(i,3) = farQuantilesError;
+    [controlStd, nearStd, farStd] = subject.getStds();
+    std(i,1) = controlStd;
+    std(i,2) = nearStd;
+    std(i,3) = farStd;
+
+    [controlQuantiles, nearQuantiles, farQuantiles] = subject.getQuantiles();
+    errorMin(i,1) = controlMedian - controlQuantiles(1);
+    errorMin(i,2) = nearMedian - nearQuantiles(1);
+    errorMin(i,3) = farMedian - farQuantiles(1);
+    errorMax(i,1) = controlQuantiles(2) - controlMedian;
+    errorMax(i,2) = nearQuantiles(2) - nearMedian;
+    errorMax(i,3) = farQuantiles(2) - farMedian;
 end
 
 % 棒グラフの描画
@@ -147,8 +157,9 @@ x = nan(nbars, ngroups);
 for i = 1:nbars
     x(i,:) = b(i).XEndPoints;
 end
+errorbar(x.',Median, errorMin,errorMax, 'k', 'linestyle', 'none');
+% errorbar(x.',Median, std, 'k', 'linestyle', 'none');
 
-errorbar(x.',Median, error, 'k', 'linestyle', 'none');
 
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
 fontsize(gcf,24,'points')

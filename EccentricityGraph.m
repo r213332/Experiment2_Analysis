@@ -1,5 +1,5 @@
 directory = "./processedData/";
-subject = "subject3/";
+subject = "subject7/";
 
 dataPath = strcat(directory, subject);
 
