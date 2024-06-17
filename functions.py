@@ -111,7 +111,7 @@ def extendedGetRT(data:pd.DataFrame):
                 c = i / n
                 degree = np.rad2deg(np.arccos(np.clip(c, -1.0, 1.0)))
                 if(prevDegree != None and returnData[-1]['GazeRT'] == None):
-                    if((prevDegree - degree) / deltaTime > 5 ):
+                    if((prevDegree - degree) / deltaTime > 50 ):
                         returnData[-1]['GazeRT'] = time
             elif(row['GazeRay_IsValid'] == 0):
                 degree = None
