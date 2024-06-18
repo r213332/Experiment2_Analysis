@@ -62,7 +62,7 @@ def extendedGetRT(data:pd.DataFrame):
     for index in range(1,len(data)):
         row = data.iloc[index]
         prev = data.iloc[index-1]
-        DeltaTime = row['RealTime'] - data.iloc[initialIndex]['RealTime'] 
+        deltaTime = row['RealTime'] - prev['RealTime'] 
         time = row['RealTime'] - data.iloc[initialIndex]['RealTime']
         if(prev['ShowStimulus'] == 0 and row['ShowStimulus'] == 1):
             initialIndex = index
@@ -76,9 +76,12 @@ def extendedGetRT(data:pd.DataFrame):
             StimulusVerticalRadian = np.deg2rad(row['StimulusVerticalDegree'])
             returnData.append({
                 'StimulusShowTime': row['RealTime'],
+                'StimulusHorizontalDegree': row['StimulusHorizontalDegree'],
+                'StimulusVerticalDegree': row['StimulusVerticalDegree'],
                 'RT': None,
                 'GazeMovement': None,
                 'GazeRT': None,
+                'InitialGazeDistance':None,
             })
         elif(show and prev['IsRightButtonPressed'] == 0 and row['IsRightButtonPressed'] == 1):
             if(time < 2.0 and time > 0.2):
@@ -110,8 +113,10 @@ def extendedGetRT(data:pd.DataFrame):
                 n = np.linalg.norm(stimulusPosition) * np.linalg.norm(calcuratedGazeDirection)
                 c = i / n
                 degree = np.rad2deg(np.arccos(np.clip(c, -1.0, 1.0)))
-                if(prevDegree != None and returnData[-1]['GazeRT'] == None):
-                    if((prevDegree - degree) / deltaTime > 50 ):
+                if(returnData[-1]['InitialGazeDistance'] == None):
+                    returnData[-1]['InitialGazeDistance'] = degree
+                if(prevDegree != None and returnData[-1]['GazeRT'] == None and deltaTime != 0):
+                    if((prevDegree - degree) / deltaTime > 200 ):
                         returnData[-1]['GazeRT'] = time
             elif(row['GazeRay_IsValid'] == 0):
                 degree = None

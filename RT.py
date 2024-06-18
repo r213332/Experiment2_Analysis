@@ -175,6 +175,6 @@ axs[1][2].set_title('Far')
 
 
 
-plt.show()
+# plt.show()
 
 
