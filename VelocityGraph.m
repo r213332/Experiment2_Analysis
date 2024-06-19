@@ -11,7 +11,10 @@ all = Velocity.empty(1, 0);
 % 各サブディレクトリに対してRTクラスのインスタンスを作成
 for i = 1:length(subdirs)
     subdirName = subdirs(i).name;
-    
+    % ファイルの存在をチェック
+    if exist(fullfile(directory, subdirName, "controlVelocity.csv"), 'file') ~= 2
+        continue;
+    end
     % 各CSVファイルを読み込む
     control = readtable(fullfile(directory, subdirName, "controlVelocity.csv"));
     near = readtable(fullfile(directory, subdirName, "nearVelocity.csv"));

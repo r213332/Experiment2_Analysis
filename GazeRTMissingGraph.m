@@ -12,7 +12,10 @@ farTable = table();
 
 for i = 1:length(subdirs)
     subdirName = subdirs(i).name;
-    
+    % ファイルの存在をチェック
+    if exist(fullfile(directory, subdirName, "controlGazeRT.csv"), 'file') ~= 2
+        continue;
+    end
     % 各CSVファイルを読み込む
     control = readtable(fullfile(directory, subdirName, "controlGazeRT.csv"));
     near = readtable(fullfile(directory, subdirName, "nearGazeRT.csv"));
@@ -60,6 +63,7 @@ medians = [median(verifiedControlTable.RT), median(verifiedMissingControlRTRows.
 figure;
 bar(medians);
 xticklabels({'対照','近傍','遠方'});
+legend('サッカードあり','サッカードなし');
 
 % 初期差
 [p,h] = ranksum(controlTable.InitialGazeDistance, missingControlRTRows.InitialGazeDistance);
