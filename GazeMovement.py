@@ -1,4 +1,3 @@
-
 import pandas as pd
 import functions
 import numpy as np
@@ -9,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 import glob
 import os
 
-subject = "subject9"
+subject = "subject10"
 csvFiles = glob.glob("./data/" + subject + "/*.csv")
 
 AllData = []
@@ -22,11 +21,11 @@ near = []
 far = []
 
 for data in AllData:
-    controlData = data.query('mode == 0')
-    nearData = data.query('mode == 1')
-    farData = data.query('mode == 2')
+    controlData = data.query("mode == 0")
+    nearData = data.query("mode == 1")
+    farData = data.query("mode == 2")
 
-    control +=  functions.extendedGetRT(controlData)
+    control += functions.extendedGetRT(controlData)
     near += functions.extendedGetRT(nearData)
     far += functions.extendedGetRT(farData)
 
@@ -35,27 +34,33 @@ for data in AllData:
 if not os.path.exists("./processedData/" + subject):
     os.makedirs("./processedData/" + subject)
 
-pd.DataFrame({
-    'RT': [x['RT'] for x in control],
-    'GazeRT': [x['GazeRT'] for x in control],
-    'StimulusHorizontalDegree': [x['StimulusHorizontalDegree'] for x in control],
-    'StimulusVerticalDegree': [x['StimulusVerticalDegree'] for x in control],
-    'InitialGazeDistance': [x['InitialGazeDistance'] for x in control],
-}).to_csv("./processedData/" + subject + '/controlGazeRT.csv', index=False)
-pd.DataFrame({
-    'RT': [x['RT'] for x in near],
-    'GazeRT': [x['GazeRT'] for x in near],
-    'StimulusHorizontalDegree': [x['StimulusHorizontalDegree'] for x in near],
-    'StimulusVerticalDegree': [x['StimulusVerticalDegree'] for x in near],
-    'InitialGazeDistance': [x['InitialGazeDistance'] for x in near],
-}).to_csv("./processedData/" + subject + '/nearGazeRT.csv', index=False)
-pd.DataFrame({
-    'RT': [x['RT'] for x in far],
-    'GazeRT': [x['GazeRT'] for x in far],
-    'StimulusHorizontalDegree': [x['StimulusHorizontalDegree'] for x in far],
-    'StimulusVerticalDegree': [x['StimulusVerticalDegree'] for x in far],
-    'InitialGazeDistance': [x['InitialGazeDistance'] for x in far],
-}).to_csv("./processedData/" + subject + '/farGazeRT.csv', index=False)
+pd.DataFrame(
+    {
+        "RT": [x["RT"] for x in control],
+        "GazeRT": [x["GazeRT"] for x in control],
+        "StimulusHorizontalDegree": [x["StimulusHorizontalDegree"] for x in control],
+        "StimulusVerticalDegree": [x["StimulusVerticalDegree"] for x in control],
+        "InitialGazeDistance": [x["InitialGazeDistance"] for x in control],
+    }
+).to_csv("./processedData/" + subject + "/controlGazeRT.csv", index=False)
+pd.DataFrame(
+    {
+        "RT": [x["RT"] for x in near],
+        "GazeRT": [x["GazeRT"] for x in near],
+        "StimulusHorizontalDegree": [x["StimulusHorizontalDegree"] for x in near],
+        "StimulusVerticalDegree": [x["StimulusVerticalDegree"] for x in near],
+        "InitialGazeDistance": [x["InitialGazeDistance"] for x in near],
+    }
+).to_csv("./processedData/" + subject + "/nearGazeRT.csv", index=False)
+pd.DataFrame(
+    {
+        "RT": [x["RT"] for x in far],
+        "GazeRT": [x["GazeRT"] for x in far],
+        "StimulusHorizontalDegree": [x["StimulusHorizontalDegree"] for x in far],
+        "StimulusVerticalDegree": [x["StimulusVerticalDegree"] for x in far],
+        "InitialGazeDistance": [x["InitialGazeDistance"] for x in far],
+    }
+).to_csv("./processedData/" + subject + "/farGazeRT.csv", index=False)
 
 
 # 全視線の動きをグラフ化
@@ -85,7 +90,3 @@ pd.DataFrame({
 
 # plt.legend()
 # plt.show()
-
-
-
-

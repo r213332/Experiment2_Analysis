@@ -1,7 +1,7 @@
 *.mp3
 
-/data
-/processedData
+/data/subject*
+/processedData/subject*
 /graphs
 /__pycache__
 

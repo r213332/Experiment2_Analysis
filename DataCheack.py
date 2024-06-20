@@ -13,7 +13,5 @@ csvFiles = glob.glob(subject + "*.csv")
 datas = []
 for csvFile in csvFiles:
     df = pd.read_csv(csvFile)
-    print(csvFile,functions.getStimulusShowTimes(df))
+    print(csvFile, functions.getStimulusShowTimes(df))
     # datas.append(df)
-
-
