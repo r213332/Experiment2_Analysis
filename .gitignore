@@ -5,4 +5,6 @@
 /graphs
 /__pycache__
 
+.DS_Store
+
 *.pyc
