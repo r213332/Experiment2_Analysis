@@ -15,6 +15,7 @@ for i = 1:length(subdirs)
     if exist(fullfile(directory, subdirName, "controlRT.csv"), 'file') ~= 2
         continue;
     end
+    disp(subdirName);
     % 各CSVファイルを読み込む
     control = readtable(fullfile(directory, subdirName, "controlRT.csv"));
     near = readtable(fullfile(directory, subdirName, "nearRT.csv"));
@@ -22,18 +23,18 @@ for i = 1:length(subdirs)
     
     % RTクラスのインスタンスを作成
     subjects(i) = RT(subdirName,control, near, far);
-    if(i == 1)
+    if isempty(all)
         all = RT('All',control, near, far);
     else
         all = all.addData(control, near, far);
     end
 end
 % allを結合
-subjects(length(subdirs)+1) = all;
+subjects(length(subjects)+1) = all;
 
-for i = 1:length(subjects)
-    subject = subjects(i);
-end
+% for i = 1:length(subjects)
+%     subject = subjects(i);
+% end
 
 % 各データを棒グラフで中央値を表示
 Median = zeros(length(subjects), 3);

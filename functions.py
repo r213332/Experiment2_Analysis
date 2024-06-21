@@ -1,6 +1,8 @@
 import pandas as pd
 import random
 import numpy as np
+import quaternion
+import matplotlib.pyplot as plt
 
 
 def getStimulusShowTimes(data: pd.DataFrame):
@@ -35,10 +37,9 @@ def getRT(data: pd.DataFrame):
                     "VDegree": row["StimulusVerticalDegree"],
                 }
             )
-        if (
-            show
-            and prev["IsRightButtonPressed"] == 0
-            and row["IsRightButtonPressed"] == 1
+        if show and (
+            (prev["IsRightButtonPressed"] == 0 and row["IsRightButtonPressed"] == 1)
+            or (prev["IsLeftButtonPressed"] == 0 and row["IsLeftButtonPressed"] == 1)
         ):
             if time < 2.0 and time > 0.2:
                 returnData[-1]["RT"] = time
@@ -205,7 +206,7 @@ def linear_interpolate_none_values(data):
 
 # TODO: 以下の関数を実装する 方針を決める 刺激提示中に限定するかしないか
 def getSI(data: pd.DataFrame):
-    data = data.query("mode != -1")
+    # data = data.query("mode != -1")
     gaze = False
     controlData = []
     nearData = []
@@ -213,10 +214,24 @@ def getSI(data: pd.DataFrame):
     nowAngleData = []
     gazeOrigin = None
     gazeDirection = None
+    rotateData = []
+    rotatedFrontVector = None
     for index in range(1, len(data)):
         row = data.iloc[index]
         prev = data.iloc[index - 1]
+        headRotation = np.quaternion(
+            row["head_rw"],
+            row["head_rx"],
+            row["head_ry"],
+            row["head_rz"],
+        )
+        # テスト用
+        print(np.degrees(quaternion.as_euler_angles(headRotation)))
+        rotateData.append(np.degrees(quaternion.as_euler_angles(headRotation)))
+        rotatedFrontVector = quaternion.as_rotation_vector(headRotation)
         if row["GazeRay_IsValid"] == 1:
+            # 視線原点が車だったため、原点を計算
+            # 頭の座標は取れており、カメラリグの座標は不動なので、以下で計算
             gazeOrigin = np.array(
                 [
                     row["GazeRay_Origin_x"],
@@ -232,6 +247,7 @@ def getSI(data: pd.DataFrame):
                 ]
             )
         else:
+            rotatedFrontVector = None
             gazeOrigin = None
             gazeDirection = None
         # 計算しない
@@ -243,15 +259,18 @@ def getSI(data: pd.DataFrame):
             # かつ、対照条件であるか、質問中であったとき
             if row["mode"] == 0 or row["isAsking"] == 1:
                 gaze = True
-                nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
+                nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
+                # nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
         # 質問されているとき
         elif prev["isAsking"] == 0 and row["isAsking"] == 1 and row["StimulusOff"] == 0:
             gaze = True
-            nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
+            nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
+            # nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
         # 条件が切り替わり、それが対照条件であったとき
         elif prev["mode"] != 0 and row["mode"] == 0 and row["StimulusOff"] == 0:
             gaze = True
-            nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
+            nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
+            # nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
         # 終了条件
         elif gaze and (
             prev["isAsking"] != row["isAsking"]
@@ -282,6 +301,11 @@ def getSI(data: pd.DataFrame):
         # 継続条件
         elif gaze:
             nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
+
+    label = ["x", "y", "z"]
+    plt.plot(rotateData, label=label)
+    plt.legend()
+    plt.show()
 
     return controlData, nearData, farData
 
