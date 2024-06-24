@@ -8,6 +8,8 @@ from sklearn.linear_model import LinearRegression
 import glob
 import os
 
+plt.close('all')
+
 subject = "testData"
 csvFiles = glob.glob("./data/" + subject + "/*.csv")
 
@@ -28,26 +30,33 @@ for data in AllData:
     far += farData
 
 # # 全視線の動きをグラフ化
-control_GazeMovement_all = [x["angle"] for x in control]
-near_GazeMovement_all = [x["angle"] for x in near]
-far_GazeMovement_all = [x["angle"] for x in far]
+control_GazeMovement_all = [[x["angle"],x["SICount"]]for x in control]
+near_GazeMovement_all = [[x["angle"],x["SICount"]] for x in near]
+far_GazeMovement_all = [[x["angle"],x["SICount"]] for x in far]
 
-# fig, axs = plt.subplots(1,3)
-# fig.suptitle("Gaze Movement")
+# plt.figure()
+# plt.title("control")
 # for i, gaze_array in enumerate(control_GazeMovement_all):
-#     axs[0].plot(gaze_array)
+#     plt.plot(gaze_array[0],label="SIcount: "+str(gaze_array[1]))
 
+# plt.legend()
+# # plt.show()
+
+# plt.figure()
+# plt.title("near")
 # for i, gaze_array in enumerate(near_GazeMovement_all):
-#     axs[1].plot(gaze_array)
+#     plt.plot(gaze_array[0],label="SIcount: "+str(gaze_array[1]))
 
-# axs[2].set_title("Far")
+# plt.legend()
+# # plt.show()
+
+# plt.figure()
+# plt.title("far")
 # for i, gaze_array in enumerate(far_GazeMovement_all):
-#     axs[2].plot(gaze_array)
+#     plt.plot(gaze_array[0],label="SIcount: "+str(gaze_array[1]))
 
-for i, gaze_array in enumerate(far_GazeMovement_all):
-    plt.plot(gaze_array)
-plt.legend()
-plt.show()
+# plt.legend()
+# plt.show()
 
 # CSVに出力するためのデータフレームを作成
 # ディレクトリが存在しない場合のみ作成

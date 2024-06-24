@@ -204,18 +204,91 @@ def linear_interpolate_none_values(data):
 # print(linear_interpolate_none_values(test))
 
 
+def linear_interpolate_and_smooth_for_getSI(values, window_size=3):
+    """線形補完を行い、その後でデータに平滑化フィルタを適用する。窓のサイズは可変。"""
+    # 補完された値を格納するリスト
+    interpolated = []
+    for i, value in enumerate(values):
+        if value is not None:
+            interpolated.append(value)
+        else:
+            # 前後の非None値を見つける
+            prev_val = next((v for v in values[i::-1] if v is not None), None)
+            next_val = next((v for v in values[i:] if v is not None), None)
+            # 両方の非None値が見つかった場合は線形補完を行う
+            if prev_val is not None and next_val is not None:
+                interpolated.append((prev_val + next_val) / 2)
+            elif prev_val is not None:
+                interpolated.append(prev_val)
+            elif next_val is not None:
+                interpolated.append(next_val)
+            else:
+                interpolated.append(None)  # すべてNoneの場合は補完不可
+
+    if(window_size > 1):
+        # smoothed_values = []
+        # for i in range(len(interpolated)):
+        #     if i < window_size // 2 or i > len(interpolated) - window_size // 2 - 1:
+        #         # リストの端では、元の値を使用
+        #         smoothed_values.append(interpolated[i])
+        #     else:
+        #         # 指定された窓のサイズで平均を取る
+        #         window_sum = sum(
+        #             interpolated[i - window_size // 2 : i + window_size // 2 + 1]
+        #         )
+        #         smoothed_value = window_sum / window_size
+        #         smoothed_values.append(smoothed_value)
+
+        # return smoothed_values
+        return kalman_filter(interpolated)
+    else:  
+        return interpolated
+    
+def kalman_filter(values):
+    if not values or len(values) == 0:
+        return []
+
+    # 初期化
+    x_est = values[0]  # 最初の観測値を初期状態推定値とする
+    P = 1.0  # 初期誤差共分散
+    Q = 1.1  # 推定誤差
+    R = 1.0  # 観測誤差
+
+    filtered_values = [x_est]
+
+    for z in values[1:]:
+        if z is None:
+            filtered_values.append(x_est)  # 観測値がNoneの場合、推定値をそのまま使用
+            continue
+
+        # 予測ステップ
+        x_pred = x_est
+        P_pred = P + Q
+
+        # 更新ステップ
+        K = P_pred / (P_pred + R)  # カルマンゲイン
+        x_est = x_pred + K * (z - x_pred)  # 状態推定値の更新
+        P = (1 - K) * P_pred  # 誤差共分散の更新
+
+        filtered_values.append(x_est)
+
+    return filtered_values
+
+
 # TODO: 以下の関数を実装する 方針を決める 刺激提示中に限定するかしないか
 def getSI(data: pd.DataFrame):
-    # data = data.query("mode != -1")
+    data = data.query("mode != -1")
     gaze = False
+    startTime = 0
     controlData = []
     nearData = []
     farData = []
     nowAngleData = []
-    gazeOrigin = None
     gazeDirection = None
     rotateData = []
     rotatedFrontVector = None
+    rotatedFrontVectors = []
+    GazeRay = []
     for index in range(1, len(data)):
         row = data.iloc[index]
         prev = data.iloc[index - 1]
@@ -226,19 +299,12 @@ def getSI(data: pd.DataFrame):
             row["head_rz"],
         )
         # テスト用
-        print(np.degrees(quaternion.as_euler_angles(headRotation)))
+        # print(np.degrees(quaternion.as_euler_angles(headRotation)))
         rotateData.append(np.degrees(quaternion.as_euler_angles(headRotation)))
-        rotatedFrontVector = quaternion.as_rotation_vector(headRotation)
+        frontVector = np.array([0, 0, 1])
+        rotatedFrontVector = quaternion.rotate_vectors(headRotation, frontVector)
+        # rotatedFrontVector = quaternion.as_rotation_vector(headRotation)
         if row["GazeRay_IsValid"] == 1:
-            # 視線原点が車だったため、原点を計算
-            # 頭の座標は取れており、カメラリグの座標は不動なので、以下で計算
-            gazeOrigin = np.array(
-                [
-                    row["GazeRay_Origin_x"],
-                    row["GazeRay_Origin_y"],
-                    row["GazeRay_Origin_z"],
-                ]
-            )
             gazeDirection = np.array(
                 [
                     row["GazeRay_Direction_x"],
@@ -246,10 +312,12 @@ def getSI(data: pd.DataFrame):
                     row["GazeRay_Direction_z"],
                 ]
             )
+            GazeRay.append(gazeDirection)
+            rotatedFrontVectors.append(rotatedFrontVector)
         else:
             rotatedFrontVector = None
-            gazeOrigin = None
             gazeDirection = None
+
         # 計算しない
         if prev["StimulusOff"] == 1 and row["StimulusOff"] == 1:
             continue
@@ -259,66 +327,257 @@ def getSI(data: pd.DataFrame):
             # かつ、対照条件であるか、質問中であったとき
             if row["mode"] == 0 or row["isAsking"] == 1:
                 gaze = True
-                nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
-                # nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
+                startTime = row["RealTime"]
+                # nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
+                nowAngleData.append(
+                    {
+                        "angle": getAngle(gazeDirection, rotatedFrontVector),
+                        "time": row["RealTime"],
+                    }
+                )
         # 質問されているとき
         elif prev["isAsking"] == 0 and row["isAsking"] == 1 and row["StimulusOff"] == 0:
             gaze = True
-            nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
-            # nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
+            startTime = row["RealTime"]
+            # nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
+            nowAngleData.append(
+                {
+                    "angle": getAngle(gazeDirection, rotatedFrontVector),
+                    "time": row["RealTime"],
+                }
+            )
         # 条件が切り替わり、それが対照条件であったとき
         elif prev["mode"] != 0 and row["mode"] == 0 and row["StimulusOff"] == 0:
             gaze = True
-            nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
-            # nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
+            startTime = row["RealTime"]
+            # nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
+            nowAngleData.append(
+                {
+                    "angle": getAngle(gazeDirection, rotatedFrontVector),
+                    "time": row["RealTime"],
+                }
+            )
         # 終了条件
         elif gaze and (
             prev["isAsking"] != row["isAsking"]
             or prev["StimulusOff"] != row["StimulusOff"]
-            or (prev["mode"] != row["mode"] and prev["modo"] == 0)
+            or (prev["mode"] != row["mode"] and prev["mode"] == 0)
         ):
-            # print(len(nowAngleData))
+            # nowAngleDataからangleのリストを抽出
+            angles = [item["angle"] for item in nowAngleData]
+
+            # angleのリストを線形補完
+            interpolated_angles = linear_interpolate_and_smooth_for_getSI(angles,window_size=1)
+
+            # 補完されたangleの値をnowAngleDataに戻す
+            for i, item in enumerate(nowAngleData):
+                item["angle"] = interpolated_angles[i]
+
+            SICount = 0
+            if len(farData) == 0 and prev["mode"] == 2:
+                SICount = detectSI(
+                    nowAngleData,
+                    startTime,
+                    row["RealTime"],
+                )
+
             if prev["mode"] == 0:
                 controlData.append(
                     {
-                        "angle": linear_interpolate_none_values(nowAngleData),
+                        # "angle": linear_interpolate_none_values(nowAngleData),
+                        "angle": [
+                            nowAngleData["angle"] for nowAngleData in nowAngleData
+                        ],
+                        "SICount": SICount,
                     }
                 )
             elif prev["mode"] == 1:
                 nearData.append(
                     {
-                        "angle": linear_interpolate_none_values(nowAngleData),
+                        # "angle": linear_interpolate_none_values(nowAngleData),
+                        "angle": [
+                            nowAngleData["angle"] for nowAngleData in nowAngleData
+                        ],
+                        "SICount": SICount,
                     }
                 )
             elif prev["mode"] == 2:
                 farData.append(
                     {
-                        "angle": linear_interpolate_none_values(nowAngleData),
+                        # "angle": linear_interpolate_none_values(nowAngleData),
+                        "angle": [
+                            nowAngleData["angle"] for nowAngleData in nowAngleData
+                        ],
+                        "SICount": SICount,
                     }
                 )
             gaze = False
+            startTime = 0
             nowAngleData = []
         # 継続条件
         elif gaze:
-            nowAngleData.append(getAngle(gazeDirection, gazeOrigin))
+            # nowAngleData.append(getAngle(gazeDirection, rotatedFrontVector))
+            nowAngleData.append(
+                {
+                    "angle": getAngle(gazeDirection, rotatedFrontVector),
+                    "time": row["RealTime"],
+                }
+            )
 
-    label = ["x", "y", "z"]
-    plt.plot(rotateData, label=label)
-    plt.legend()
-    plt.show()
+    # X, Y, Z = zip(*rotatedFrontVectors)
+    # U, V, W = [0] * len(X), [0] * len(Y), [0] * len(Z)
+
+    # GX,GY,GZ = zip(*GazeRay)
+
+    # print(getAngle(rotatedFrontVectors[2000], GazeRay[2000]))
+    # # ベクトルを描画
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection="3d")
+    # ax.quiver(U[2000:2005], V[2000:2005], W[2000:2005], X[2000:2005], Y[2000:2005], Z[2000:2005])
+    # ax.quiver(X[2000:2005], Y[2000:2005], Z[2000:2005], GX[2000:2005], GY[2000:2005], GZ[2000:2005],color="red")
+    # ax.set_xlabel("X")
+    # ax.set_ylabel("Y")
+    # ax.set_zlabel("Z")
+    # ax.set_xlim(-2, 2)
+    # ax.set_ylim(-2, 2)
+    # ax.set_zlim(-2, 2)
+    # plt.show()
+    # plt.figure()
 
     return controlData, nearData, farData
 
 
 def getAngle(vector1, vector2):
-
-    if vector1 is None and vector2 is None:
+    if vector1 is None or vector2 is None:
         return None
     i = np.inner(vector1, vector2)
     n = np.linalg.norm(vector1) * np.linalg.norm(vector2)
     c = i / n
     degree = np.rad2deg(np.arccos(np.clip(c, -1.0, 1.0)))
     return degree
+
+
+def detectSI(data: list, start: float, end: float):
+    # print("ditectSI:",data)
+    time = [item["time"] for item in data]
+    angle = [item["angle"] for item in data]
+    plt.plot(time, angle, color="blue")
+
+    onMoveing = False
+    onRaiseSaccrdic = False
+    onFallSaccrdic = False
+    onRaiseSaccrdicTime = None
+    onFallSaccrdicTime = None
+    raisedValue = 0
+    raiseInitialIndex = 1
+    raiseFinishIndex = 1
+    fallInitialIndex = 1
+    fallFinishIndex = 1
+    SICount = 0
+    saccrdicThreshold = 50
+    foldTimeThresholdMin = 0.05
+    foldTimeThresholdMax = 0.4
+    amplitudeTreashold = 2
+    maxError = 1.1 
+    # 以下デバッグ用
+    risingCount = 0
+    for index in range(1, len(data)):
+        gazeMoving = data[index]["angle"] - data[index - 1]["angle"]
+        gazeVelocity = gazeMoving / (data[index]["time"] - data[index - 1]["time"])
+        if gazeVelocity > saccrdicThreshold and onRaiseSaccrdic == False:
+            onRaiseSaccrdic = True
+            raiseInitialIndex = index
+            while (
+                data[raiseInitialIndex]["angle"] - data[raiseInitialIndex - 1]["angle"]
+                > 0
+            ):
+                raiseInitialIndex -= 1
+                if raiseInitialIndex == 0:
+                    break
+            raisedValue = data[raiseInitialIndex]["angle"]
+            # print("raise start")
+        elif gazeVelocity < saccrdicThreshold and onRaiseSaccrdic:
+            onRaiseSaccrdic = False
+            raiseFinishIndex = index
+            while (
+                data[raiseFinishIndex + 1]["angle"] - data[raiseFinishIndex]["angle"]
+                > 0
+            ):
+                raiseFinishIndex += 1
+                if raiseFinishIndex == len(data) - 1:
+                    break
+            if (
+                abs(data[raiseFinishIndex]["angle"] - data[raiseInitialIndex]["angle"])
+                < amplitudeTreashold
+            ):
+                onRaiseSaccrdicTime = data[raiseInitialIndex]["time"]
+                # print(
+                #     "detect Raise:",
+                #     onRaiseSaccrdicTime,
+                #     "move angle:",
+                #     data[raiseFinishIndex]["angle"] - data[raiseInitialIndex]["angle"],
+                # )
+
+        if gazeVelocity < -saccrdicThreshold and onFallSaccrdic == False:
+            onFallSaccrdic = True
+            fallInitialIndex = index
+            while (
+                data[fallInitialIndex]["angle"] - data[fallInitialIndex - 1]["angle"]
+                < 0
+            ):
+                fallInitialIndex -= 1
+                if fallInitialIndex == 0:
+                    break
+            # print("fall start")
+        elif gazeVelocity > -saccrdicThreshold and onFallSaccrdic:
+            onFallSaccrdic = False
+            fallFinishIndex = index
+            while (
+                data[fallFinishIndex + 1]["angle"] - data[fallFinishIndex]["angle"] < 0
+            ):
+                fallFinishIndex += 1
+                if fallFinishIndex == len(data) - 1:
+                    break
+            if (
+                abs(data[fallFinishIndex]["angle"] - raisedValue)
+                < maxError
+            ):
+                onFallSaccrdicTime = data[fallFinishIndex]["time"]
+                # print(
+                #     "detect Fall:",
+                #     onFallSaccrdicTime,
+                #     "move angle:",
+                #     data[fallFinishIndex]["angle"] - data[fallInitialIndex]["angle"],
+                # )
+
+        if onRaiseSaccrdicTime != None and onFallSaccrdicTime != None:
+            if (onFallSaccrdicTime - onRaiseSaccrdicTime) > foldTimeThresholdMin and (
+                onFallSaccrdicTime - onRaiseSaccrdicTime
+            ) < foldTimeThresholdMax:
+                plotData = data[raiseInitialIndex:fallFinishIndex]
+                time = [item["time"] for item in plotData]
+                angle = [item["angle"] for item in plotData]
+                plt.plot(time, angle, color="red")
+                print("--------------------")
+                print(
+                    "SI Detected! RaiseTime:",
+                    onRaiseSaccrdicTime,
+                    "FallTime:",
+                    onFallSaccrdicTime,
+                )
+                print("--------------------")
+                SICount += 1
+                risingCount += 1
+                onFallSaccrdicTime = None
+                onRaiseSaccrdicTime = None
+
+    print("risingCount:", risingCount)
+
+    plt.title("SI Count: " + str(SICount))
+    plt.legend()
+    plt.show()
+
+    return SICount
 
 
 def getVelocity(data: pd.DataFrame):
