@@ -95,10 +95,9 @@ def extendedGetRT(data: pd.DataFrame):
                     "InitialGazeDistance": None,
                 }
             )
-        elif (
-            show
-            and prev["IsRightButtonPressed"] == 0
-            and row["IsRightButtonPressed"] == 1
+        elif show and (
+            (prev["IsRightButtonPressed"] == 0 and row["IsRightButtonPressed"] == 1)
+            or (prev["IsLeftButtonPressed"] == 0 and row["IsLeftButtonPressed"] == 1)
         ):
             if time < 2.0 and time > 0.2:
                 returnData[-1]["RT"] = time
@@ -111,53 +110,76 @@ def extendedGetRT(data: pd.DataFrame):
 
         if gaze:
             if row["GazeRay_IsValid"] == 1:
+                ############################################################################################################
+                # 頭部の位置座標がとれていなかったため没
                 # 頭部の位置と視線を複合計算
-                x_2 = (
-                    row["GazeRay_Direction_x"] ** 2
-                    + row["GazeRay_Direction_y"] ** 2
-                    + row["GazeRay_Direction_z"] ** 2
-                )
-                x_1 = (
-                    2 * row["GazeRay_Origin_x"] * row["GazeRay_Direction_x"]
-                    + 2 * row["GazeRay_Origin_y"] * row["GazeRay_Direction_y"]
-                    + 2 * row["GazeRay_Origin_z"] * row["GazeRay_Direction_z"]
-                )
-                x_0 = (
-                    sitmulusDistance**2
-                    - row["GazeRay_Origin_x"] ** 2
-                    - row["GazeRay_Origin_y"] ** 2
-                    - row["GazeRay_Origin_z"] ** 2
-                )
-                x = np.roots([x_2, x_1, x_0])
-                x = x[x >= 0]
-                # print(x)
-                calcuratedGazeDirection = np.array(
-                    [
-                        row["GazeRay_Origin_x"] + x[0] * row["GazeRay_Direction_x"],
-                        row["GazeRay_Origin_y"] + x[0] * row["GazeRay_Direction_y"],
-                        row["GazeRay_Origin_z"] + x[0] * row["GazeRay_Direction_z"],
-                    ]
-                )
+                # x_2 = (
+                #     row["GazeRay_Direction_x"] ** 2
+                #     + row["GazeRay_Direction_y"] ** 2
+                #     + row["GazeRay_Direction_z"] ** 2
+                # )
+                # x_1 = (
+                #     2 * row["GazeRay_Origin_x"] * row["GazeRay_Direction_x"]
+                #     + 2 * row["GazeRay_Origin_y"] * row["GazeRay_Direction_y"]
+                #     + 2 * row["GazeRay_Origin_z"] * row["GazeRay_Direction_z"]
+                # )
+                # x_0 = (
+                #     sitmulusDistance**2
+                #     - row["GazeRay_Origin_x"] ** 2
+                #     - row["GazeRay_Origin_y"] ** 2
+                #     - row["GazeRay_Origin_z"] ** 2
+                # )
+                # x = np.roots([x_2, x_1, x_0])
+                # x = x[x >= 0]
+                # # print(x)
+                # calcuratedGazeDirection = np.array(
+                #     [
+                #         row["GazeRay_Origin_x"] + x[0] * row["GazeRay_Direction_x"],
+                #         row["GazeRay_Origin_y"] + x[0] * row["GazeRay_Direction_y"],
+                #         row["GazeRay_Origin_z"] + x[0] * row["GazeRay_Direction_z"],
+                #     ]
+                # )
                 # gazeOrigin = np.array([row['GazeRay_Origin_x'],row['GazeRay_Origin_y'],row['GazeRay_Origin_z']])
                 # gazeDirection = np.array([row['GazeRay_Direction_x'],row['GazeRay_Direction_y'],row['GazeRay_Direction_z']])
-                stimulusPosition_y = np.sin(StimulusVerticalRadian) * sitmulusDistance
-                stimulusTempDistance = np.cos(StimulusVerticalRadian) * sitmulusDistance
-                stimulusPosition_x = (
-                    -1 * stimulusTempDistance * np.sin(StimulusHorizontalRadian)
+                # stimulusPosition_y = np.sin(StimulusVerticalRadian) * sitmulusDistance
+                # stimulusTempDistance = np.cos(StimulusVerticalRadian) * sitmulusDistance
+                # stimulusPosition_x = (
+                #     -1 * stimulusTempDistance * np.sin(StimulusHorizontalRadian)
+                # )
+                # stimulusPosition_z = stimulusTempDistance * np.cos(
+                #     StimulusHorizontalRadian
+                # )
+                # stimulusPosition = np.array(
+                #     [stimulusPosition_x, stimulusPosition_y, stimulusPosition_z]
+                # )
+                # # stimulusDireciton = stimulusPosition - gazeOrigin
+                # i = np.inner(stimulusPosition, calcuratedGazeDirection)
+                # n = np.linalg.norm(stimulusPosition) * np.linalg.norm(
+                #     calcuratedGazeDirection
+                # )
+                # c = i / n
+                # degree = np.rad2deg(np.arccos(np.clip(c, -1.0, 1.0)))
+                ############################################################################################################
+                # 代わりに頭部の向きと視線の向きで計算
+                headRotation = np.quaternion(
+                    row["head_rw"],
+                    row["head_rx"],
+                    row["head_ry"],
+                    row["head_rz"],
                 )
-                stimulusPosition_z = stimulusTempDistance * np.cos(
-                    StimulusHorizontalRadian
+                frontVector = np.array([0, 0, 1])
+                # 頭部の向きを示すベクトル
+                rotatedFrontVector = quaternion.rotate_vectors(
+                    headRotation, frontVector
                 )
-                stimulusPosition = np.array(
-                    [stimulusPosition_x, stimulusPosition_y, stimulusPosition_z]
+                gazeDirection = np.array(
+                    [
+                        row["GazeRay_Direction_x"],
+                        row["GazeRay_Direction_y"],
+                        row["GazeRay_Direction_z"],
+                    ]
                 )
-                # stimulusDireciton = stimulusPosition - gazeOrigin
-                i = np.inner(stimulusPosition, calcuratedGazeDirection)
-                n = np.linalg.norm(stimulusPosition) * np.linalg.norm(
-                    calcuratedGazeDirection
-                )
-                c = i / n
-                degree = np.rad2deg(np.arccos(np.clip(c, -1.0, 1.0)))
+                degree = getAngle(gazeDirection, rotatedFrontVector)
                 if returnData[-1]["InitialGazeDistance"] == None:
                     returnData[-1]["InitialGazeDistance"] = degree
                 if (
@@ -165,7 +187,7 @@ def extendedGetRT(data: pd.DataFrame):
                     and returnData[-1]["GazeRT"] == None
                     and deltaTime != 0
                 ):
-                    if (prevDegree - degree) / deltaTime > 200:
+                    if abs(prevDegree - degree) / deltaTime > 200:
                         returnData[-1]["GazeRT"] = time
             elif row["GazeRay_IsValid"] == 0:
                 degree = None
@@ -225,7 +247,7 @@ def linear_interpolate_and_smooth_for_getSI(values, window_size=3):
             else:
                 interpolated.append(None)  # すべてNoneの場合は補完不可
 
-    if(window_size > 1):
+    if window_size > 1:
         # smoothed_values = []
         # for i in range(len(interpolated)):
         #     if i < window_size // 2 or i > len(interpolated) - window_size // 2 - 1:
@@ -240,10 +262,14 @@ def linear_interpolate_and_smooth_for_getSI(values, window_size=3):
         #         smoothed_values.append(smoothed_value)
 
         # return smoothed_values
-        return kalman_filter(interpolated)
-    else:  
+
+        # return kalman_filter(interpolated)
+
         return interpolated
-    
+    else:
+        return interpolated
+
+
 def kalman_filter(values):
     if not values or len(values) == 0:
         return []
@@ -367,19 +393,23 @@ def getSI(data: pd.DataFrame):
             angles = [item["angle"] for item in nowAngleData]
 
             # angleのリストを線形補完
-            interpolated_angles = linear_interpolate_and_smooth_for_getSI(angles,window_size=1)
+            interpolated_angles = linear_interpolate_and_smooth_for_getSI(
+                angles, window_size=1
+            )
 
             # 補完されたangleの値をnowAngleDataに戻す
             for i, item in enumerate(nowAngleData):
                 item["angle"] = interpolated_angles[i]
 
-            SICount = 0
-            if len(farData) == 0 and prev["mode"] == 2:
-                SICount = detectSI(
-                    nowAngleData,
-                    startTime,
-                    row["RealTime"],
-                )
+            # SICount = 0
+            # if len(farData) == 0 and prev["mode"] == 2:
+            #     SICount = detectSI(
+            #         nowAngleData,
+            #         startTime,
+            #         row["RealTime"],
+            #     )
+            SICount = detectSI(nowAngleData)
+            SIFrequency = SICount / (row["RealTime"] - startTime)
 
             if prev["mode"] == 0:
                 controlData.append(
@@ -388,7 +418,7 @@ def getSI(data: pd.DataFrame):
                         "angle": [
                             nowAngleData["angle"] for nowAngleData in nowAngleData
                         ],
-                        "SICount": SICount,
+                        "SIFrequency": SIFrequency,
                     }
                 )
             elif prev["mode"] == 1:
@@ -398,7 +428,7 @@ def getSI(data: pd.DataFrame):
                         "angle": [
                             nowAngleData["angle"] for nowAngleData in nowAngleData
                         ],
-                        "SICount": SICount,
+                        "SIFrequency": SIFrequency,
                     }
                 )
             elif prev["mode"] == 2:
@@ -408,7 +438,7 @@ def getSI(data: pd.DataFrame):
                         "angle": [
                             nowAngleData["angle"] for nowAngleData in nowAngleData
                         ],
-                        "SICount": SICount,
+                        "SIFrequency": SIFrequency,
                     }
                 )
             gaze = False
@@ -450,6 +480,14 @@ def getSI(data: pd.DataFrame):
 def getAngle(vector1, vector2):
     if vector1 is None or vector2 is None:
         return None
+
+    vector1 = vector1.copy()
+    vector2 = vector2.copy()
+
+    # 検出する角度を水平方向に限定(y軸を0にする)
+    vector1[1] = 0
+    vector2[1] = 0
+
     i = np.inner(vector1, vector2)
     n = np.linalg.norm(vector1) * np.linalg.norm(vector2)
     c = i / n
@@ -457,125 +495,133 @@ def getAngle(vector1, vector2):
     return degree
 
 
-def detectSI(data: list, start: float, end: float):
+def detectSI(data: list):
     # print("ditectSI:",data)
     time = [item["time"] for item in data]
     angle = [item["angle"] for item in data]
     plt.plot(time, angle, color="blue")
+    plt.xlabel("Time[s]")
+    plt.ylabel("Angle[deg]")
 
-    onMoveing = False
-    onRaiseSaccrdic = False
-    onFallSaccrdic = False
-    onRaiseSaccrdicTime = None
-    onFallSaccrdicTime = None
+    onRaisesaccadic = False
+    onFallsaccadic = False
+    onRaisesaccadicTime = None
+    onFallsaccadicTime = None
     raisedValue = 0
     raiseInitialIndex = 1
     raiseFinishIndex = 1
     fallInitialIndex = 1
     fallFinishIndex = 1
     SICount = 0
-    saccrdicThreshold = 50
-    foldTimeThresholdMin = 0.05
-    foldTimeThresholdMax = 0.4
-    amplitudeTreashold = 2
-    maxError = 1.1 
+    saccadicThreshold = 50
+    foldTimeThresholdMin = 0.04
+    foldTimeThresholdMax = 1.0
+    amplitudeTreashold = 5.0
+    maxError = 1.1
     # 以下デバッグ用
     risingCount = 0
     for index in range(1, len(data)):
+        if data[index]["angle"] == None or data[index - 1]["angle"] == None:
+            continue
         gazeMoving = data[index]["angle"] - data[index - 1]["angle"]
         gazeVelocity = gazeMoving / (data[index]["time"] - data[index - 1]["time"])
-        if gazeVelocity > saccrdicThreshold and onRaiseSaccrdic == False:
-            onRaiseSaccrdic = True
+        if gazeVelocity > saccadicThreshold and onRaisesaccadic == False:
+            onRaisesaccadic = True
             raiseInitialIndex = index
-            while (
-                data[raiseInitialIndex]["angle"] - data[raiseInitialIndex - 1]["angle"]
-                > 0
-            ):
-                raiseInitialIndex -= 1
-                if raiseInitialIndex == 0:
-                    break
+            if raiseInitialIndex > 0:
+                while (
+                    data[raiseInitialIndex]["angle"]
+                    - data[raiseInitialIndex - 1]["angle"]
+                    > 0
+                ):
+                    raiseInitialIndex -= 1
+                    if raiseInitialIndex == 0:
+                        break
             raisedValue = data[raiseInitialIndex]["angle"]
             # print("raise start")
-        elif gazeVelocity < saccrdicThreshold and onRaiseSaccrdic:
-            onRaiseSaccrdic = False
+        elif gazeVelocity < saccadicThreshold and onRaisesaccadic:
+            onRaisesaccadic = False
             raiseFinishIndex = index
-            while (
-                data[raiseFinishIndex + 1]["angle"] - data[raiseFinishIndex]["angle"]
-                > 0
-            ):
-                raiseFinishIndex += 1
-                if raiseFinishIndex == len(data) - 1:
-                    break
+            if raiseFinishIndex < len(data) - 1:
+                while (
+                    data[raiseFinishIndex + 1]["angle"]
+                    - data[raiseFinishIndex]["angle"]
+                    > 0
+                ):
+                    raiseFinishIndex += 1
+                    if raiseFinishIndex >= len(data) - 1:
+                        break
             if (
                 abs(data[raiseFinishIndex]["angle"] - data[raiseInitialIndex]["angle"])
                 < amplitudeTreashold
             ):
-                onRaiseSaccrdicTime = data[raiseInitialIndex]["time"]
+                onRaisesaccadicTime = data[raiseInitialIndex]["time"]
                 # print(
                 #     "detect Raise:",
-                #     onRaiseSaccrdicTime,
+                #     onRaisesaccadicTime,
                 #     "move angle:",
                 #     data[raiseFinishIndex]["angle"] - data[raiseInitialIndex]["angle"],
                 # )
 
-        if gazeVelocity < -saccrdicThreshold and onFallSaccrdic == False:
-            onFallSaccrdic = True
+        if gazeVelocity < -saccadicThreshold and onFallsaccadic == False:
+            onFallsaccadic = True
             fallInitialIndex = index
-            while (
-                data[fallInitialIndex]["angle"] - data[fallInitialIndex - 1]["angle"]
-                < 0
-            ):
-                fallInitialIndex -= 1
-                if fallInitialIndex == 0:
-                    break
+            if fallFinishIndex > 0:
+                while (
+                    data[fallInitialIndex]["angle"]
+                    - data[fallInitialIndex - 1]["angle"]
+                    < 0
+                ):
+                    fallInitialIndex -= 1
+                    if fallInitialIndex == 0:
+                        break
             # print("fall start")
-        elif gazeVelocity > -saccrdicThreshold and onFallSaccrdic:
-            onFallSaccrdic = False
+        elif gazeVelocity > -saccadicThreshold and onFallsaccadic:
+            onFallsaccadic = False
             fallFinishIndex = index
-            while (
-                data[fallFinishIndex + 1]["angle"] - data[fallFinishIndex]["angle"] < 0
-            ):
-                fallFinishIndex += 1
-                if fallFinishIndex == len(data) - 1:
-                    break
-            if (
-                abs(data[fallFinishIndex]["angle"] - raisedValue)
-                < maxError
-            ):
-                onFallSaccrdicTime = data[fallFinishIndex]["time"]
+            if fallFinishIndex < len(data) - 1:
+                while (
+                    data[fallFinishIndex + 1]["angle"] - data[fallFinishIndex]["angle"]
+                    < 0
+                ):
+                    fallFinishIndex += 1
+                    if fallFinishIndex == len(data) - 1:
+                        break
+            if abs(data[fallFinishIndex]["angle"] - raisedValue) < maxError:
+                onFallsaccadicTime = data[fallFinishIndex]["time"]
                 # print(
                 #     "detect Fall:",
-                #     onFallSaccrdicTime,
+                #     onFallsaccadicTime,
                 #     "move angle:",
                 #     data[fallFinishIndex]["angle"] - data[fallInitialIndex]["angle"],
                 # )
 
-        if onRaiseSaccrdicTime != None and onFallSaccrdicTime != None:
-            if (onFallSaccrdicTime - onRaiseSaccrdicTime) > foldTimeThresholdMin and (
-                onFallSaccrdicTime - onRaiseSaccrdicTime
+        if onRaisesaccadicTime != None and onFallsaccadicTime != None:
+            if (onFallsaccadicTime - onRaisesaccadicTime) > foldTimeThresholdMin and (
+                onFallsaccadicTime - onRaisesaccadicTime
             ) < foldTimeThresholdMax:
                 plotData = data[raiseInitialIndex:fallFinishIndex]
                 time = [item["time"] for item in plotData]
                 angle = [item["angle"] for item in plotData]
                 plt.plot(time, angle, color="red")
-                print("--------------------")
-                print(
-                    "SI Detected! RaiseTime:",
-                    onRaiseSaccrdicTime,
-                    "FallTime:",
-                    onFallSaccrdicTime,
-                )
-                print("--------------------")
+                # print("--------------------")
+                # print(
+                #     "SI Detected! RaiseTime:",
+                #     onRaisesaccadicTime,
+                #     "FallTime:",
+                #     onFallsaccadicTime,
+                # )
+                # print("--------------------")
                 SICount += 1
                 risingCount += 1
-                onFallSaccrdicTime = None
-                onRaiseSaccrdicTime = None
+                onFallsaccadicTime = None
+                onRaisesaccadicTime = None
 
-    print("risingCount:", risingCount)
+    # print("risingCount:", risingCount)
 
     plt.title("SI Count: " + str(SICount))
     plt.legend()
-    plt.show()
+    # plt.show()
 
     return SICount
 

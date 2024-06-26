@@ -1,3 +1,4 @@
+clear;
 directory = "./processedData/";
 % ディレクトリ内のすべてのサブディレクトリを取得
 subdirs = dir(directory);
@@ -29,7 +30,7 @@ for i = 1:length(subdirs)
     end
 end
 % allを結合
-subjects(length(subdirs)+1) = all;
+subjects(length(subjects)+1) = all;
 
 % 各データを棒グラフで中央値を表示
 Median = zeros(length(subjects), 3);

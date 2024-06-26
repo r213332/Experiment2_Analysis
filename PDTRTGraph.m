@@ -1,3 +1,4 @@
+clear;
 directory = "./processedData/";
 % ディレクトリ内のすべてのサブディレクトリを取得
 subdirs = dir(directory);
@@ -5,7 +6,7 @@ subdirs = subdirs([subdirs.isdir]);  % ディレクトリのみを取得
 subdirs = subdirs(~ismember({subdirs.name}, {'.', '..'}));  % '.'と'..'を除外
 
 % RTクラスの配列を宣言
-subjects = RT.empty(length(subdirs)+1, 0);
+subjects = RT.empty(0, 0);
 all = RT.empty(1, 0);
 
 % 各サブディレクトリに対してRTクラスのインスタンスを作成
@@ -22,7 +23,8 @@ for i = 1:length(subdirs)
     far = readtable(fullfile(directory, subdirName, "farRT.csv"));
     
     % RTクラスのインスタンスを作成
-    subjects(i) = RT(subdirName,control, near, far);
+    % subjects(i) = RT(subdirName,control, near, far);
+    subjects = [subjects, RT(subdirName,control, near, far)];
     if isempty(all)
         all = RT('All',control, near, far);
     else
@@ -30,7 +32,7 @@ for i = 1:length(subdirs)
     end
 end
 % allを結合
-subjects(length(subjects)+1) = all;
+subjects = [subjects, all];
 
 % for i = 1:length(subjects)
 %     subject = subjects(i);
@@ -182,17 +184,17 @@ mkdir(graphDir);
 saveas(gcf, fullfile(graphDir, 'PDT_RT_Graph.png'));
 
 % allのデータを表示
-all = subjects(length(subjects));
-P = all.kruskalwallis();
-[C_N_P,C_F_P,N_F_P] = all.ranksum();
-disp("allのクラスカルワリス検定");
-disp(P);
-disp("対照条件と近接条件のウィルコクソン順位和検定");
-disp(C_N_P);
-disp("対照条件と遠方条件のウィルコクソン順位和検定");
-disp(C_F_P);
-disp("近接条件と遠方条件のウィルコクソン順位和検定");
-disp(N_F_P);
+% all = subjects(length(subjects));
+% P = all.kruskalwallis();
+% [C_N_P,C_F_P,N_F_P] = all.ranksum();
+% disp("allのクラスカルワリス検定");
+% disp(P);
+% disp("対照条件と近接条件のウィルコクソン順位和検定");
+% disp(C_N_P);
+% disp("対照条件と遠方条件のウィルコクソン順位和検定");
+% disp(C_F_P);
+% disp("近接条件と遠方条件のウィルコクソン順位和検定");
+% disp(N_F_P);
 
 % MissRateの検定&描画
 [s1_c_h,C_P] = swtest(MissingRate(:,1));
@@ -203,22 +205,32 @@ disp(C_P);
 disp(N_P);
 disp(F_P);
 % クラスカルワリス検定
-figure;
-[subject_p,subject_tbl,subject_stats] = kruskalwallis(MissingRate, [], 'off');
-disp("MissRateのクラスカルワリス検定");
-disp(subject_p);
-result = multcompare(subject_stats);
-medianMissRate = median(MissingRate);
-bar(medianMissRate);
+% figure;
+% [subject_p,subject_tbl,subject_stats] = kruskalwallis(MissingRate, [], 'off');
+% disp("MissRateのクラスカルワリス検定");
+% disp(subject_p);
+% result = multcompare(subject_stats);
+% medianMissRate = median(MissingRate);
+% bar(medianMissRate);
 
 % ANOVA
-% figure;
-% [p,table,stats] = anova1(MissingRate);
-% disp("MissRateのANOVA");
-% disp(p);
-% result = multcompare(stats);
-% meanMissRate = mean(MissingRate);
-% bar(meanMissRate);
+figure;
+[p,table,stats] = anova1(MissingRate);
+disp("MissRateのANOVA");
+disp(p);
+meanMissRate = mean(MissingRate);
+stdMissRate = std(MissingRate);
+bar(meanMissRate);
+hold on;
+errorbar(meanMissRate, stdMissRate, 'k', 'linestyle', 'none');
+
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
+fontsize(gcf,24,'points')
+ylim([0, 1.0]);
+ylabel("見逃し率の平均");
+xticklabels(["対照条件", "近接条件", "遠方条件"]);
+
+saveas(gcf, fullfile(graphDir, 'PDT_RT_Miss_Graph.png'));
 
 
 
