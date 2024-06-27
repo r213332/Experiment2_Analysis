@@ -2,6 +2,7 @@
 classdef RT
     properties
         name
+        drivingFrequency
         control
         near
         far
@@ -13,10 +14,11 @@ classdef RT
     
     methods
         % コンストラクタ
-        function obj = RT(name,control, near, far)
+        function obj = RT(name,drivingFrequency,control, near, far)
             % 引数のバリデーション
-            if nargin == 4
+            if nargin == 5
                 obj.name = name;
+                obj.drivingFrequency = drivingFrequency;
                 % 刺激の見逃し率計算
                 obj.controlMiss = (height(control) - length(rmmissing(control{:, 1})));
                 obj.nearMiss = (height(near) - length(rmmissing(near{:, 1})));

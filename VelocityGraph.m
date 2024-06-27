@@ -20,6 +20,11 @@ for i = 1:length(subdirs)
     control = readtable(fullfile(directory, subdirName, "controlVelocity.csv"));
     near = readtable(fullfile(directory, subdirName, "nearVelocity.csv"));
     far = readtable(fullfile(directory, subdirName, "farVelocity.csv"));
+    % meta.jsonファイルを読み込む
+    metaFilePath = fullfile(directory, subdirName, "meta.json");
+    metaContent = fileread(metaFilePath);
+    meta = jsondecode(metaContent);
+    disp(meta.name);
     
     % RTクラスのインスタンスを作成
     subjects(i) = Velocity(subdirName,control, near, far);
@@ -29,6 +34,14 @@ for i = 1:length(subdirs)
         all = all.addData(control, near, far);
     end
 end
+% subjects配列からnameプロパティの値を抽出
+names = arrayfun(@(x) x.name, subjects, 'UniformOutput', false);
+
+% namesをアルファベット順にソートし、ソートされたインデックスを取得
+[~, sortedIndices] = sort(names);
+
+% ソートされたインデックスを使用してsubjects配列を並び替え
+subjects = subjects(sortedIndices);
 % allを結合
 subjects(length(subjects)+1) = all;
 

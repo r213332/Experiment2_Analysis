@@ -2,6 +2,7 @@
 classdef Velocity
     properties
         name
+        drivingFrequency
         control
         near
         far
@@ -9,10 +10,11 @@ classdef Velocity
     
     methods
         % コンストラクタ
-        function obj = Velocity(name,control, near, far)
+        function obj = Velocity(name,drivingFrequency,control, near, far)
             % 引数のバリデーション
-            if nargin == 4
+            if nargin == 5
                 obj.name = name;
+                obj.drivingFrequency = drivingFrequency;
 
                 % 未反応をフィルタリング
                 obj.control = rmmissing(control{:, 1});

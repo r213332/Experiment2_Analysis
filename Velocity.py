@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 import glob
 import os
+import shutil
 
 
 def Velocity(subject: str):
+    # データの読み込み
     csvFiles = glob.glob("./data/" + subject + "/*.csv")
 
     AllData = []
@@ -31,6 +33,10 @@ def Velocity(subject: str):
     # ディレクトリが存在しない場合のみ作成
     if not os.path.exists("./processedData/" + subject):
         os.makedirs("./processedData/" + subject)
+
+    shutil.copy(
+        "./data/" + subject + "/meta.json", "./processedData/" + subject + "/meta.json"
+    )
     pd.DataFrame(
         {
             "Velocity": control,
