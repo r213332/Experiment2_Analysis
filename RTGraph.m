@@ -35,7 +35,7 @@ for i = 1:length(subdirs)
     
     % RTクラスのインスタンスを作成
     % subjects(i) = RT(subdirName,control, near, far);
-    subject = RT(meta.view,meta.driving_frequency,control, near, far);
+    subject = RT(meta.name,meta.driving_frequency,control, near, far);
     subjects = [subjects, subject];
     if(meta.driving_frequency == "high")
         high = [high, subject];
@@ -89,11 +89,11 @@ low = [low, lowAll];
 DFALL = [all,highAll, mediumAll, lowAll];
 
 % 各データを検定結果付きで表示
-showData(subjects, 'PDT_RT_Graph.png');
-showData(high, 'PDT_RT_High_Graph.png');
-showData(medium, 'PDT_RT_Medium_Graph.png');
-showData(low, 'PDT_RT_Low_Graph.png');
-showData(DFALL, 'PDT_RT_DFALL_Graph.png');
+showData(subjects, 'PDT_RT_name_Graph.png');
+% showData(high, 'PDT_RT_High_Graph.png');
+% showData(medium, 'PDT_RT_Medium_Graph.png');
+% showData(low, 'PDT_RT_Low_Graph.png');
+% showData(DFALL, 'PDT_RT_DFALL_Graph.png');
 
 % for i = 1:length(subjects)
 %     subject = subjects(i);
