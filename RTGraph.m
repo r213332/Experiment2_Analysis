@@ -90,6 +90,10 @@ DFALL = [all,highAll, mediumAll, lowAll];
 
 % 各データを検定結果付きで表示
 showData(subjects, 'PDT_RT_name_Graph.png');
+
+% allのデータを表示
+showOneData(all, 'PDT_RT_All_Graph.png');
+
 % showData(high, 'PDT_RT_High_Graph.png');
 % showData(medium, 'PDT_RT_Medium_Graph.png');
 % showData(low, 'PDT_RT_Low_Graph.png');
@@ -139,21 +143,21 @@ disp(F_P);
 % bar(medianMissRate);
 
 % ANOVA
-figure;
-p = anova1(MissingRate);
-meanMissRate = mean(MissingRate);
-stdMissRate = std(MissingRate);
-bar(meanMissRate);
-hold on;
-errorbar(meanMissRate, stdMissRate, 'k', 'linestyle', 'none');
+% figure;
+% p = anova1(MissingRate);
+% meanMissRate = mean(MissingRate);
+% stdMissRate = std(MissingRate);
+% bar(meanMissRate);
+% hold on;
+% errorbar(meanMissRate, stdMissRate, 'k', 'linestyle', 'none');
 
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
-fontsize(gcf,24,'points')
-ylim([0, 1.0]);
-ylabel("見逃し率の平均");
-xticklabels(["対照条件", "近接条件", "遠方条件"]);
+% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
+% fontsize(gcf,24,'points')
+% ylim([0, 1.0]);
+% ylabel("見逃し率の平均");
+% xticklabels(["対照条件", "近接条件", "遠方条件"]);
 
-saveas(gcf, fullfile('./graphs', 'PDT_RT_Miss_Graph.png'));
+% saveas(gcf, fullfile('./graphs', 'PDT_RT_Miss_Graph.png'));
 
 function sortedData = sortData(data)
     % subjects配列からnameプロパティの値を抽出
@@ -164,6 +168,118 @@ function sortedData = sortData(data)
 
     % ソートされたインデックスを使用してsubjects配列を並び替え
     sortedData = data(sortedIndices);
+end
+
+% 一つの結果を検定結果付きで表示する関数
+function showOneData(subject,fileName)
+    % 各データを棒グラフで中央値を表示
+    Median = zeros(3,1);
+    errorMin = zeros(3,1);
+    errorMax = zeros(3,1);
+
+    MissingRate = zeros(3);
+
+
+        [controlMedian, nearMedian, farMedian] = subject.getMedians();
+        Median(1) = controlMedian;
+        Median(2) = nearMedian;
+        Median(3) = farMedian;
+
+
+        [controlQuantiles, nearQuantiles, farQuantiles] = subject.getQuantiles();
+        errorMin(1) = controlMedian - controlQuantiles(1);
+        errorMin(2) = nearMedian - nearQuantiles(1);
+        errorMin(3) = farMedian - farQuantiles(1);
+        errorMax(1) = controlQuantiles(2) - controlMedian;
+        errorMax(2) = nearQuantiles(2) - nearMedian;
+        errorMax(3) = farQuantiles(2) - farMedian;
+
+        [controlMissRate, nearMissRate, farMissRate] = subject.getMissingRate();
+        MissingRate(1) = controlMissRate;
+        MissingRate(2) = nearMissRate;
+        MissingRate(3) = farMissRate;
+
+    % 棒グラフの描画
+    figure;
+    b = bar(Median);
+    hold on;
+    % 検定結果のp値の表示
+    y = b.YEndPoints;
+    x = b.XEndPoints;
+    xStart = [x(1), x(1), x(2)];
+    xEnd = [x(2), x(3), x(3)];
+    ytips = max(y) + 0.08;
+    yStep = 0.04;
+    C_N_label = '';
+    C_F_label = '';
+    N_F_label = '';
+
+    p = subject.kruskalwallis();
+    disp(subject.name);
+    disp(p); 
+    if(p < 0.05)
+        [C_N_P,C_F_P,N_F_P] = subject.ranksum();
+        if(C_N_P < 0.05)
+            C_N_label = "*";
+        end
+        if(C_N_P < 0.01)
+            C_N_label = "**";
+        end
+
+        if(C_F_P < 0.05)
+            C_F_label = "*";
+        end
+        if(C_F_P < 0.01)
+            C_F_label = "**";
+        end
+
+        if(N_F_P < 0.05)
+            N_F_label = "*";
+        end
+        if(N_F_P < 0.01)
+            N_F_label = "**";
+        end
+
+        C_N_label = strcat(strcat(C_N_label,' p='), string(C_N_P));
+        C_F_label = strcat(strcat(C_F_label,' p='), string(C_F_P));
+        N_F_label = strcat(strcat(N_F_label,' p='), string(N_F_P));
+
+    else
+        xStart = xEnd;
+    end
+
+    labels = [C_N_label, C_F_label, N_F_label];
+
+    % disp([xStart; xEnd]);
+    % disp([ytips+yStep,ytips+3*yStep,ytips+2*yStep;ytips+yStep,ytips+3*yStep,ytips+2*yStep]);
+
+    line([xStart; xEnd], [ytips+yStep,ytips+3*yStep,ytips+2*yStep;ytips+yStep,ytips+3*yStep,ytips+2*yStep], 'Color', 'k');
+    text((xEnd + xStart)./2, [ytips+yStep,ytips+3*yStep,ytips+2*yStep], labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
+
+
+
+    % エラーバーの描画
+    [ngroups,nbars] = size(Median);
+    % Get the x coordinate of the bars
+    x = nan(nbars, ngroups);
+    for i = 1:nbars
+        x(i,:) = b(i).XEndPoints;
+    end
+    errorbar(x.',Median, errorMin,errorMax, 'k', 'linestyle', 'none');
+
+    % グラフの装飾
+    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
+    fontsize(gcf,24,'points')
+    title("PDTへの反応時間（中央値）");
+    ylabel("反応時間[s]");
+    ylim([0, 0.75]);
+    legend("反応時間の中央値",'四分位範囲','',''); 
+    xticklabels(["対照条件", "近接条件", "遠方条件"]);
+
+    % グラフを保存
+    graphDir = './graphs';
+    mkdir(graphDir);
+    saveas(gcf, fullfile(graphDir, fileName));
 end
 
 % 各データを検定結果付きで表示する関数

@@ -7,6 +7,7 @@ classdef Objects
         RightMirror,
         LeftMirror,
         Other,
+        vector,
     end
     
     methods
@@ -20,6 +21,7 @@ classdef Objects
                 obj.RightMirror = data.RightMirror;
                 obj.LeftMirror = data.LeftMirror;
                 obj.Other = data.Other;
+                obj.vector = data.vector;
             else
                 error('Arguments for data are required');
             end
@@ -32,6 +34,10 @@ classdef Objects
             obj.RightMirror = obj.RightMirror + data.RightMirror;
             obj.LeftMirror = obj.LeftMirror + data.LeftMirror;
             obj.Other = obj.Other + data.Other;
+
+            % disp(obj.vector);
+            % disp(data.vector);
+            obj.vector = [obj.vector; data.vector];
         end
     end
 end

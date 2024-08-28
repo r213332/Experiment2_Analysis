@@ -694,25 +694,37 @@ def getLookingObjectCount(data: pd.DataFrame):
         "RightMirror": 0,
         "LeftMirror": 0,
         "Other": 0,
+        "vector": [],
     }
     for index in range(1, len(data)):
         row = data.iloc[index]
         prev = data.iloc[index - 1]
         if row["GazeRay_IsValid"] == 1 and row["StimulusOff"] == 0:
             # 見ているもの
-            looking_object = ''
-            if("Object010" in row["LookingObject"]):
-                looking_object = 'Car'
-            elif("Meter" in row["LookingObject"]):
-                looking_object = 'Meter'
-            elif("RoomMirror" in row["LookingObject"]):
-                looking_object = 'RoomMirror'
-            elif("mirror_right" in row["LookingObject"]):
-                looking_object = 'RightMirror'
-            elif("mirror_left" in row["LookingObject"]):
-                looking_object = 'LeftMirror'
+            looking_object = ""
+            if "Object010" in row["LookingObject"]:
+                looking_object = "Car"
+                frontvector = np.array([1, 0, 0])
+                gazeDirection = np.array(
+                    [
+                        row["GazeRay_Direction_x"],
+                        row["GazeRay_Direction_y"],
+                        row["GazeRay_Direction_z"],
+                    ]
+                )
+                # なす角
+                angle = getAngle(gazeDirection, frontvector)
+                returnData["vector"].append(angle)
+            elif "Meter" in row["LookingObject"]:
+                looking_object = "Meter"
+            elif "RoomMirror" in row["LookingObject"]:
+                looking_object = "RoomMirror"
+            elif "mirror_right" in row["LookingObject"]:
+                looking_object = "RightMirror"
+            elif "mirror_left" in row["LookingObject"]:
+                looking_object = "LeftMirror"
             else:
-                looking_object = 'Other'
+                looking_object = "Other"
 
             returnData[looking_object] += 1
 

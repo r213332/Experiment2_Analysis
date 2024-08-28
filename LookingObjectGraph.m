@@ -56,6 +56,39 @@ disp(all.far);
 % パイチャートの描画
 RenderingPieChart(all);
 
+% 各条件の視線ベクトルをヒストグラムで表示
+figure;
+subplot(1,3,1)
+histogram(all.control.vector, 'Normalization', 'probability');
+xlim([70, 110]);
+ylim([0, 0.05]);
+xlabel("角度[°]");
+ylabel("割合");
+title("対照条件")
+subplot(1,3,2)
+histogram(all.near.vector, 'Normalization', 'probability');
+xlim([70, 110]);
+ylim([0, 0.05]);
+xlabel("角度[°]");
+ylabel("割合");
+title("近接条件")
+subplot(1,3,3)
+histogram(all.far.vector, 'Normalization', 'probability');
+xlim([70, 110]);
+ylim([0, 0.05]);
+xlabel("角度[°]");
+ylabel("割合");
+title("遠方条件")
+
+% グラフの装飾
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
+fontsize(gcf,24,'points')
+
+% グラフを保存
+graphDir = './graphs';
+mkdir(graphDir);
+saveas(gcf, fullfile(graphDir, 'Car_GazeDegree.png'));
+
 function RenderingPieChart(data)
     columuns = ["Car", "Meter", "RoomMirror", "RightMirror", "LeftMirror", "Other"];
     controlPieData = [data.control.Car, data.control.Meter, data.control.RoomMirror, data.control.RightMirror, data.control.LeftMirror, data.control.Other];
