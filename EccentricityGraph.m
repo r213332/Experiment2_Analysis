@@ -90,12 +90,15 @@ missingFarRTRows = farTable(ismissing(farTable.RT), :);
 % PDTRTと偏心度の関係
 
 labelPos_x = 45;
+labelPos_y = 0.9;
+xLimit = [2.5,56];
+yLimit = [0.2,1.5];
 
 figure
 nexttile
 plot(verifiedControlTable.HDegree,verifiedControlTable.RT,'o');
-xlim([0,56]);
-ylim([0.3,1.0]);
+xlim(xLimit);
+ylim(yLimit);
 xlabel('偏心度(水平)[°]');
 ylabel('応答時間[s]');
 title('対照');
@@ -103,13 +106,13 @@ lsline;
 mdl = fitlm(verifiedControlTable,'RT~HDegree');  % Create a linear regression model
 a_far = mdl.Coefficients.Estimate(2);  % Get the intercept
 R2_control = mdl.Rsquared.Ordinary;  % Get the R-squared value
-text(labelPos_x, 0.94, ['a = ', num2str(a_far)]);
-text(labelPos_x, 0.9, ['R^2 = ', num2str(R2_control)]);
+text(labelPos_x, labelPos_y + 0.04, ['a = ', num2str(a_far)]);
+text(labelPos_x, labelPos_y, ['R^2 = ', num2str(R2_control)]);
 
 nexttile
 plot(verifiedNearTable.HDegree,verifiedNearTable.RT,'o');
-xlim([0,56]);
-ylim([0.3,1.0]);
+xlim(xLimit);
+ylim(yLimit);
 xlabel('偏心度(水平)[°]');
 ylabel('応答時間[s]');
 title('近傍');
@@ -117,13 +120,13 @@ lsline;
 mdl = fitlm(verifiedNearTable,'RT~HDegree');  % Create a linear regression model
 a_far = mdl.Coefficients.Estimate(2);  % Get the intercept
 R2_near = mdl.Rsquared.Ordinary;  % Get the R-squared value
-text(labelPos_x, 0.94, ['a = ', num2str(a_far)]);
-text(labelPos_x, 0.9, ['R^2 = ', num2str(R2_near)]);
+text(labelPos_x, labelPos_y + 0.04, ['a = ', num2str(a_far)]);
+text(labelPos_x, labelPos_y, ['R^2 = ', num2str(R2_control)]);
 
 nexttile
 plot(verifiedFarTable.HDegree,verifiedFarTable.RT,'o');
-xlim([0,56]);
-ylim([0.3,1.0]);
+xlim(xLimit);
+ylim(yLimit);
 xlabel('偏心度(水平)[°]');
 ylabel('応答時間[s]');
 lsline;
@@ -131,8 +134,8 @@ title('遠方');
 mdl = fitlm(verifiedFarTable,'RT~HDegree');  % Create a linear regression model
 a_far = mdl.Coefficients.Estimate(2);  % Get the intercept
 R2_far = mdl.Rsquared.Ordinary;  % Get the R-squared value
-text(labelPos_x, 0.94, ['a = ', num2str(a_far)]);
-text(labelPos_x, 0.9, ['R^2 = ', num2str(R2_far)]);
+text(labelPos_x, labelPos_y + 0.04, ['a = ', num2str(a_far)]);
+text(labelPos_x, labelPos_y, ['R^2 = ', num2str(R2_control)]);
 
 nexttile
 histogram(missingControlRTRows.HDegree);
