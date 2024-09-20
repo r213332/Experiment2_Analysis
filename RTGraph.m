@@ -35,7 +35,7 @@ for i = 1:length(subdirs)
     
     % RTクラスのインスタンスを作成
     % subjects(i) = RT(subdirName,control, near, far);
-    subject = RT(meta.name,meta.driving_frequency,control, near, far);
+    subject = RT(meta.view,meta.driving_frequency,control, near, far);
     subjects = [subjects, subject];
     if(meta.driving_frequency == "high")
         high = [high, subject];
@@ -143,21 +143,27 @@ disp(F_P);
 % bar(medianMissRate);
 
 % ANOVA
-% figure;
-% p = anova1(MissingRate);
-% meanMissRate = mean(MissingRate);
-% stdMissRate = std(MissingRate);
-% bar(meanMissRate);
-% hold on;
-% errorbar(meanMissRate, stdMissRate, 'k', 'linestyle', 'none');
+figure;
+p = anova1(MissingRate);
+disp("MissRateのANOVA");
+disp(p);
+meanMissRate = mean(MissingRate);
+stdMissRate = std(MissingRate);
+b = bar(meanMissRate);
+hold on;
+errorbar(meanMissRate, stdMissRate, 'k', 'linestyle', 'none');
 
-% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
-% fontsize(gcf,24,'points')
-% ylim([0, 1.0]);
-% ylabel("見逃し率の平均");
-% xticklabels(["対照条件", "近接条件", "遠方条件"]);
+line([b.XEndPoints(1); b.XEndPoints(3)], [b.YEndPoints(1) + 0.4;b.YEndPoints(1) + 0.4], 'Color', 'k');
+text(b.XEndPoints(2), b.YEndPoints(1) + 0.4, strcat('p=',string(p)), 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
-% saveas(gcf, fullfile('./graphs', 'PDT_RT_Miss_Graph.png'));
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
+fontsize(gcf,24,'points')
+ylim([0, 1.0]);
+ylabel("見逃し率の平均");
+xticklabels(["対照条件", "近接条件", "遠方条件"]);
+title('PDTの見逃し率の平均');
+
+saveas(gcf, fullfile('./graphs', 'PDT_RT_Miss_Graph.png'));
 
 function sortedData = sortData(data)
     % subjects配列からnameプロパティの値を抽出
