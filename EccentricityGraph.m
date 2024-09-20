@@ -101,7 +101,7 @@ ylabel('応答時間[s]');
 title('対照');
 lsline;
 mdl = fitlm(verifiedControlTable,'RT~HDegree');  % Create a linear regression model
-a_far = mdl.Coefficients.Estimate(1);  % Get the intercept
+a_far = mdl.Coefficients.Estimate(2);  % Get the intercept
 R2_control = mdl.Rsquared.Ordinary;  % Get the R-squared value
 text(labelPos_x, 0.94, ['a = ', num2str(a_far)]);
 text(labelPos_x, 0.9, ['R^2 = ', num2str(R2_control)]);
@@ -115,7 +115,7 @@ ylabel('応答時間[s]');
 title('近傍');
 lsline;
 mdl = fitlm(verifiedNearTable,'RT~HDegree');  % Create a linear regression model
-a_far = mdl.Coefficients.Estimate(1);  % Get the intercept
+a_far = mdl.Coefficients.Estimate(2);  % Get the intercept
 R2_near = mdl.Rsquared.Ordinary;  % Get the R-squared value
 text(labelPos_x, 0.94, ['a = ', num2str(a_far)]);
 text(labelPos_x, 0.9, ['R^2 = ', num2str(R2_near)]);
@@ -129,7 +129,7 @@ ylabel('応答時間[s]');
 lsline;
 title('遠方');
 mdl = fitlm(verifiedFarTable,'RT~HDegree');  % Create a linear regression model
-a_far = mdl.Coefficients.Estimate(1);  % Get the intercept
+a_far = mdl.Coefficients.Estimate(2);  % Get the intercept
 R2_far = mdl.Rsquared.Ordinary;  % Get the R-squared value
 text(labelPos_x, 0.94, ['a = ', num2str(a_far)]);
 text(labelPos_x, 0.9, ['R^2 = ', num2str(R2_far)]);
