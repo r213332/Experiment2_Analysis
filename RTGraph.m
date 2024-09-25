@@ -75,7 +75,7 @@ for i = 1:length(subdirs)
 end
 % ソートしてallを結合
 subjects = sortData(subjects);
-subjects = [subjects, all];
+% subjects = [subjects, all];
 
 high = sortData(high);
 high = [high, highAll];
@@ -151,14 +151,14 @@ meanMissRate = mean(MissingRate);
 stdMissRate = std(MissingRate);
 b = bar(meanMissRate);
 hold on;
-errorbar(meanMissRate, stdMissRate, 'k', 'linestyle', 'none');
+errorbar(meanMissRate, stdMissRate, 'k', 'linestyle', 'none','LineWidth', 2);
 
-line([b.XEndPoints(1); b.XEndPoints(3)], [b.YEndPoints(1) + 0.4;b.YEndPoints(1) + 0.4], 'Color', 'k');
-text(b.XEndPoints(2), b.YEndPoints(1) + 0.4, strcat('p=',string(p)), 'HorizontalAlignment','center','VerticalAlignment','bottom');
+% line([b.XEndPoints(1); b.XEndPoints(3)], [b.YEndPoints(1) + 0.4;b.YEndPoints(1) + 0.4], 'Color', 'k','LineWidth', 2);
+% text(b.XEndPoints(2), b.YEndPoints(1) + 0.4, strcat('p=',string(p)), 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
 fontsize(gcf,24,'points')
-ylim([0, 1.0]);
+ylim([0, 0.55]);
 ylabel("見逃し率の平均");
 xticklabels(["対照条件", "近接条件", "遠方条件"]);
 title('PDTの見逃し率の平均');
@@ -259,7 +259,7 @@ function showOneData(subject,fileName)
     % disp([xStart; xEnd]);
     % disp([ytips+yStep,ytips+3*yStep,ytips+2*yStep;ytips+yStep,ytips+3*yStep,ytips+2*yStep]);
 
-    line([xStart; xEnd], [ytips+yStep,ytips+3*yStep,ytips+2*yStep;ytips+yStep,ytips+3*yStep,ytips+2*yStep], 'Color', 'k');
+    line([xStart; xEnd], [ytips+yStep,ytips+3*yStep,ytips+2*yStep;ytips+yStep,ytips+3*yStep,ytips+2*yStep], 'Color', 'k','LineWidth', 2);
     text((xEnd + xStart)./2, [ytips+yStep,ytips+3*yStep,ytips+2*yStep], labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
 
@@ -271,7 +271,7 @@ function showOneData(subject,fileName)
     for i = 1:nbars
         x(i,:) = b(i).XEndPoints;
     end
-    errorbar(x.',Median, errorMin,errorMax, 'k', 'linestyle', 'none');
+    errorbar(x.',Median, errorMin,errorMax, 'k', 'linestyle', 'none','LineWidth', 2);
 
     % グラフの装飾
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
@@ -351,7 +351,7 @@ function showData(subjects,fileName)
             labels(i) = "";
         end
     end
-    line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k');
+    line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k','LineWidth', 2);
     text((xStart + xEnd)./2, ytips+yStep, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
     % 対照条件と遠方条件
@@ -377,7 +377,7 @@ function showData(subjects,fileName)
             labels(i) = "";
         end
     end
-    line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k');
+    line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k','LineWidth', 2);
     text((xStart + xEnd)./2, ytips+yStep, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
     % 近接条件と遠方条件
@@ -403,7 +403,7 @@ function showData(subjects,fileName)
             labels(i) = "";
         end
     end
-    line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k');
+    line([xStart; xEnd], [ytips+yStep; ytips+yStep], 'Color', 'k','LineWidth', 2);
     text((xStart + xEnd)./2, ytips+yStep, labels, 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
 
@@ -414,7 +414,7 @@ function showData(subjects,fileName)
     for i = 1:nbars
         x(i,:) = b(i).XEndPoints;
     end
-    errorbar(x.',Median, errorMin,errorMax, 'k', 'linestyle', 'none');
+    errorbar(x.',Median, errorMin,errorMax, 'k', 'linestyle', 'none','LineWidth', 2);
 
     % グラフの装飾
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
