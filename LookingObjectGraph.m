@@ -54,28 +54,28 @@ disp("all.far")
 disp(all.far);
 
 % パイチャートの描画
-RenderingPieChart(all);
+% RenderingPieChart(all);
 
 % 各条件の視線ベクトルをヒストグラムで表示
 figure;
 subplot(1,3,1)
 histogram(all.control.vector, 'Normalization', 'probability');
 xlim([70, 110]);
-ylim([0, 0.05]);
+ylim([0, 0.07]);
 xlabel("角度[°]");
 ylabel("割合");
 title("対照条件")
 subplot(1,3,2)
 histogram(all.near.vector, 'Normalization', 'probability');
 xlim([70, 110]);
-ylim([0, 0.05]);
+ylim([0, 0.07]);
 xlabel("角度[°]");
 ylabel("割合");
 title("近接条件")
 subplot(1,3,3)
 histogram(all.far.vector, 'Normalization', 'probability');
 xlim([70, 110]);
-ylim([0, 0.05]);
+ylim([0, 0.07]);
 xlabel("角度[°]");
 ylabel("割合");
 title("遠方条件")

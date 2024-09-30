@@ -104,9 +104,9 @@ ylabel('応答時間[s]');
 title('対照');
 lsline;
 mdl = fitlm(verifiedControlTable,'RT~HDegree');  % Create a linear regression model
-a_far = mdl.Coefficients.Estimate(2);  % Get the intercept
+a_control = mdl.Coefficients.Estimate(2);  % Get the intercept
 R2_control = mdl.Rsquared.Ordinary;  % Get the R-squared value
-text(labelPos_x, labelPos_y + 0.1, ['a = ', num2str(a_far)]);
+text(labelPos_x, labelPos_y + 0.1, ['a = ', num2str(a_control)]);
 text(labelPos_x, labelPos_y, ['R^2 = ', num2str(R2_control)]);
 
 nexttile
@@ -118,10 +118,10 @@ ylabel('応答時間[s]');
 title('近傍');
 lsline;
 mdl = fitlm(verifiedNearTable,'RT~HDegree');  % Create a linear regression model
-a_far = mdl.Coefficients.Estimate(2);  % Get the intercept
+a_near = mdl.Coefficients.Estimate(2);  % Get the intercept
 R2_near = mdl.Rsquared.Ordinary;  % Get the R-squared value
-text(labelPos_x, labelPos_y + 0.1, ['a = ', num2str(a_far)]);
-text(labelPos_x, labelPos_y, ['R^2 = ', num2str(R2_control)]);
+text(labelPos_x, labelPos_y + 0.1, ['a = ', num2str(a_near)]);
+text(labelPos_x, labelPos_y, ['R^2 = ', num2str(R2_near)]);
 
 nexttile
 plot(verifiedFarTable.HDegree,verifiedFarTable.RT,'o');
@@ -135,7 +135,7 @@ mdl = fitlm(verifiedFarTable,'RT~HDegree');  % Create a linear regression model
 a_far = mdl.Coefficients.Estimate(2);  % Get the intercept
 R2_far = mdl.Rsquared.Ordinary;  % Get the R-squared value
 text(labelPos_x, labelPos_y + 0.1, ['a = ', num2str(a_far)]);
-text(labelPos_x, labelPos_y, ['R^2 = ', num2str(R2_control)]);
+text(labelPos_x, labelPos_y, ['R^2 = ', num2str(R2_far)]);
 
 nexttile
 histogram(missingControlRTRows.HDegree);

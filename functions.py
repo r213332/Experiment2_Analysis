@@ -704,17 +704,6 @@ def getLookingObjectCount(data: pd.DataFrame):
             looking_object = ""
             if "Object010" in row["LookingObject"]:
                 looking_object = "Car"
-                frontvector = np.array([1, 0, 0])
-                gazeDirection = np.array(
-                    [
-                        row["GazeRay_Direction_x"],
-                        row["GazeRay_Direction_y"],
-                        row["GazeRay_Direction_z"],
-                    ]
-                )
-                # なす角
-                angle = getAngle(gazeDirection, frontvector)
-                returnData["vector"].append(angle)
             elif "Meter" in row["LookingObject"]:
                 looking_object = "Meter"
             elif "RoomMirror" in row["LookingObject"]:
@@ -725,6 +714,18 @@ def getLookingObjectCount(data: pd.DataFrame):
                 looking_object = "LeftMirror"
             else:
                 looking_object = "Other"
+
+            frontvector = np.array([1, 0, 0])
+            gazeDirection = np.array(
+                [
+                    row["GazeRay_Direction_x"],
+                    row["GazeRay_Direction_y"],
+                    row["GazeRay_Direction_z"],
+                ]
+            )
+            # なす角
+            angle = getAngle(gazeDirection, frontvector)
+            returnData["vector"].append(angle)
 
             returnData[looking_object] += 1
 
