@@ -100,7 +100,7 @@ plot(verifiedControlTable.HDegree,verifiedControlTable.RT,'o');
 xlim(xLimit);
 ylim(yLimit);
 xlabel('偏心度(水平)[°]');
-ylabel('応答時間[s]');
+ylabel('反応時間[s]');
 title('対照');
 lsline;
 mdl = fitlm(verifiedControlTable,'RT~HDegree');  % Create a linear regression model
@@ -114,7 +114,7 @@ plot(verifiedNearTable.HDegree,verifiedNearTable.RT,'o');
 xlim(xLimit);
 ylim(yLimit);
 xlabel('偏心度(水平)[°]');
-ylabel('応答時間[s]');
+ylabel('反応時間[s]');
 title('近傍');
 lsline;
 mdl = fitlm(verifiedNearTable,'RT~HDegree');  % Create a linear regression model
@@ -128,7 +128,7 @@ plot(verifiedFarTable.HDegree,verifiedFarTable.RT,'o');
 xlim(xLimit);
 ylim(yLimit);
 xlabel('偏心度(水平)[°]');
-ylabel('応答時間[s]');
+ylabel('反応時間[s]');
 lsline;
 title('遠方');
 mdl = fitlm(verifiedFarTable,'RT~HDegree');  % Create a linear regression model
