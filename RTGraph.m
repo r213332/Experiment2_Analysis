@@ -157,7 +157,7 @@ errorbar(meanMissRate, stdMissRate, 'k', 'linestyle', 'none','LineWidth', 2);
 % text(b.XEndPoints(2), b.YEndPoints(1) + 0.4, strcat('p=',string(p)), 'HorizontalAlignment','center','VerticalAlignment','bottom');
 
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
-fontsize(gcf,24,'points')
+fontsize(gcf,36,'points')
 ylim([0, 0.55]);
 ylabel("見逃し率の平均");
 xticklabels(["対照条件", "近接条件", "遠方条件"]);
@@ -275,7 +275,7 @@ function showOneData(subject,fileName)
 
     % グラフの装飾
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
-    fontsize(gcf,24,'points')
+    fontsize(gcf,36,'points')
     title("PDTへの反応時間（中央値）");
     ylabel("反応時間[s]");
     ylim([0, 0.75]);
@@ -418,7 +418,7 @@ function showData(subjects,fileName)
 
     % グラフの装飾
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
-    fontsize(gcf,24,'points')
+    fontsize(gcf,36,'points')
     title("PDTへの反応時間（中央値）");
     ylabel("反応時間[s]");
     ylim([0, 1.5]);

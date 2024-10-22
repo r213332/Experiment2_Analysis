@@ -89,7 +89,7 @@ missingFarRTRows = farTable(ismissing(farTable.RT), :);
 
 % PDTRTと偏心度の関係
 
-labelPos_x = 32.5;
+labelPos_x = 37.5;
 labelPos_y = 1.35;
 xLimit = [2.5,56];
 yLimit = [0.2,1.5];
@@ -137,14 +137,19 @@ R2_far = mdl.Rsquared.Ordinary;  % Get the R-squared value
 text(labelPos_x, labelPos_y + 0.1, ['a = ', num2str(a_far)]);
 text(labelPos_x, labelPos_y, ['R^2 = ', num2str(R2_far)]);
 
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 2, 1]);
+fontsize(gcf,36,'points')
+saveas(gcf, fullfile('./graphs', 'PDTRT_Degree_Graph.png'));
+
+figure;
+
 nexttile
 histogram(missingControlRTRows.HDegree);
 xlim([0,60]);
 ylim([0,100]);
 xlabel('偏心度(水平)[°]');
 ylabel('見逃し数[個]');
-title('対照miss');
-
+title('対照');
 
 nexttile
 histogram(missingNearRTRows.HDegree);
@@ -152,7 +157,7 @@ xlim([0,60]);
 ylim([0,100]);
 xlabel('偏心度(水平)[°]');
 ylabel('見逃し数[個]');
-title('近傍miss');
+title('近接');
 
 nexttile
 histogram(missingFarRTRows.HDegree);
@@ -160,11 +165,11 @@ xlim([0,60]);
 ylim([0,100]);
 xlabel('偏心度(水平)[°]');
 ylabel('見逃し数[個]');
-title('遠方miss');
+title('遠方');
 
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
-fontsize(gcf,24,'points')
-saveas(gcf, fullfile('./graphs', 'PDTRT_Degree_Graph.png'));
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 2, 1]);
+fontsize(gcf,36,'points')
+saveas(gcf, fullfile('./graphs', 'PDTMissing_Degree_Graph.png'));
 
 
 
