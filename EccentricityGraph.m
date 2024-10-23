@@ -148,7 +148,7 @@ StimulusHDegree = 5.5:2.5:53.0;
 nexttile
 % missingControlRTRows.HDegreeの要素をStimulusDegreeに基づいて集計
 [~, ~, controlBin] = histcounts(missingControlRTRows.HDegree, [StimulusHDegree, Inf]);
-controlCounts = accumarray(bin(controlBin > 0), 1, [length(StimulusHDegree), 1]);
+controlCounts = accumarray(controlBin(controlBin > 0), 1, [length(StimulusHDegree), 1]);
 % 見逃し数から見逃し率を計算
 [~,~,controlIdx] = unique(controlTable.HDegree);
 controlMissRate = controlCounts ./ accumarray(controlIdx, 1);
