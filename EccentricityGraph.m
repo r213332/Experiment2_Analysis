@@ -149,9 +149,12 @@ nexttile
 % missingControlRTRows.HDegreeの要素をStimulusDegreeに基づいて集計
 [~, ~, controlBin] = histcounts(missingControlRTRows.HDegree, [StimulusHDegree, Inf]);
 controlCounts = accumarray(bin(controlBin > 0), 1, [length(StimulusHDegree), 1]);
-bar(StimulusHDegree, controlCounts);
+% 見逃し数から見逃し率を計算
+[~,~,controlIdx] = unique(controlTable.HDegree);
+controlMissRate = controlCounts ./ accumarray(controlIdx, 1);
+bar(StimulusHDegree, controlMissRate);
 xlim([0,60]);
-ylim([0,100]);
+ylim([0,1.1]);
 xlabel('偏心度(水平)[°]');
 ylabel('見逃し数[個]');
 title('対照');
@@ -159,9 +162,12 @@ title('対照');
 nexttile
 [~,~,nearBin] = histcounts(missingNearRTRows.HDegree, [StimulusHDegree, Inf]);
 nearCounts = accumarray(nearBin(nearBin > 0), 1, [length(StimulusHDegree), 1]);
-bar(StimulusHDegree, nearCounts);
+% 見逃し数から見逃し率を計算
+[~,~,nearIdx] = unique(nearTable.HDegree);
+nearMissRate = nearCounts ./ accumarray(nearIdx, 1);
+bar(StimulusHDegree, nearMissRate);
 xlim([0,60]);
-ylim([0,100]);
+ylim([0,1.1]);
 xlabel('偏心度(水平)[°]');
 ylabel('見逃し数[個]');
 title('近接');
@@ -169,9 +175,12 @@ title('近接');
 nexttile
 [~,~,farBin] = histcounts(missingFarRTRows.HDegree, [StimulusHDegree, Inf]);
 farCounts = accumarray(farBin(farBin > 0), 1, [length(StimulusHDegree), 1]);
-bar(StimulusHDegree, farCounts);
+% 見逃し数から見逃し率を計算
+[~,~,farIdx] = unique(farTable.HDegree);
+farMissRate = farCounts ./ accumarray(farIdx, 1);
+bar(StimulusHDegree, farMissRate);
 xlim([0,60]);
-ylim([0,100]);
+ylim([0,1.1]);
 xlabel('偏心度(水平)[°]');
 ylabel('見逃し数[個]');
 title('遠方');
