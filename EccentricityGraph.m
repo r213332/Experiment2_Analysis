@@ -156,7 +156,7 @@ bar(StimulusHDegree, controlMissRate);
 xlim([0,60]);
 ylim([0,1.1]);
 xlabel('偏心度(水平)[°]');
-ylabel('見逃し数[個]');
+ylabel('見逃し率[%]');
 title('対照');
 
 nexttile
@@ -169,7 +169,7 @@ bar(StimulusHDegree, nearMissRate);
 xlim([0,60]);
 ylim([0,1.1]);
 xlabel('偏心度(水平)[°]');
-ylabel('見逃し数[個]');
+ylabel('見逃し率[%]');
 title('近接');
 
 nexttile
@@ -182,7 +182,7 @@ bar(StimulusHDegree, farMissRate);
 xlim([0,60]);
 ylim([0,1.1]);
 xlabel('偏心度(水平)[°]');
-ylabel('見逃し数[個]');
+ylabel('見逃し率[%]');
 title('遠方');
 
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 2, 1]);
