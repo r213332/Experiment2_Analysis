@@ -216,9 +216,9 @@ function showOneData(subject,fileName)
     xEnd = [x(2), x(3), x(3)];
     ytips = max(y) + 0.08;
     yStep = 0.04;
-    C_N_label = '';
-    C_F_label = '';
-    N_F_label = '';
+    C_N_label = 'n.s.';
+    C_F_label = 'n.s.';
+    N_F_label = 'n.s.';
 
     p = subject.kruskalwallis();
     disp(subject.name);

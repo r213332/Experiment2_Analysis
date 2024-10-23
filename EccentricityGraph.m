@@ -142,9 +142,7 @@ fontsize(gcf,36,'points')
 saveas(gcf, fullfile('./graphs', 'PDTRT_Degree_Graph.png'));
 
 figure;
-
 StimulusHDegree = 5.5:2.5:53.0;
-
 nexttile
 % missingControlRTRows.HDegreeの要素をStimulusDegreeに基づいて集計
 [~, ~, controlBin] = histcounts(missingControlRTRows.HDegree, [StimulusHDegree, Inf]);
