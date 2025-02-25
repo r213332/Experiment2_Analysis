@@ -101,7 +101,10 @@ classdef RT
             % パディングされた配列を連結
             concatenated_array = [padded_control, padded_near, padded_far];
             % クラスカルウォリス検定
-            [subject_p,subject_tbl,subject_stats] = kruskalwallis(concatenated_array, [], 'off');
+            [subject_p,subject_tbl,subject_stats] = kruskalwallis(concatenated_array, {'controlo','near','far'}, 'off');
+            disp(obj.name);
+            disp(subject_tbl);
+            disp(subject_stats);
         end
 
         % シャピロウィルク検定
@@ -114,9 +117,30 @@ classdef RT
 
         % 多重比較 ウィルコクソンの順位和検定
         function [C_N_P,C_F_P,N_F_P] = ranksum(obj)
-            [C_N_P,C_N_H] = ranksum(obj.control, obj.near, 'alpha', 0.05);
-            [C_F_P,C_F_H] = ranksum(obj.control, obj.far, 'alpha', 0.05);
-            [N_F_P,N_F_H] = ranksum(obj.near, obj.far, 'alpha', 0.05);
+            disp("多重比較--------------");
+            disp(obj.name);
+            [C_N_P,~,C_N_ST] = ranksum(obj.control, obj.near, 'alpha', 0.05);
+            disp("対照条件と近条件の統計量");
+            disp(C_N_P);
+            disp(C_N_ST);
+            nx = length(obj.control);
+            U = C_N_ST.ranksum - (nx * (nx + 1) / 2);
+            disp("U値=" + num2str(U));
+            [C_F_P,~,C_F_ST] = ranksum(obj.control, obj.far, 'alpha', 0.05);
+            disp("対照条件と遠条件の統計量");
+            disp(C_F_P);
+            disp(C_F_ST);
+            nx = length(obj.control);
+            U = C_F_ST.ranksum - (nx * (nx + 1) / 2);
+            disp("U値=" + num2str(U));
+            [N_F_P,~,N_F_ST] = ranksum(obj.near, obj.far, 'alpha', 0.05);
+            disp("近条件と遠条件の統計量");
+            disp(N_F_P);
+            disp(N_F_ST);
+            nx = length(obj.near);
+            U = N_F_ST.ranksum - (nx * (nx + 1) / 2);
+            disp("U値=" + num2str(U));
+            disp("---------------------");
         end
     end
 end

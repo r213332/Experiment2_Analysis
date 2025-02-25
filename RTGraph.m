@@ -22,7 +22,7 @@ for i = 1:length(subdirs)
     if exist(fullfile(directory, subdirName, "controlRT.csv"), 'file') ~= 2
         continue;
     end
-    disp(subdirName);
+    % disp(subdirName);
     % 各CSVファイルを読み込む
     control = readtable(fullfile(directory, subdirName, "controlRT.csv"));
     near = readtable(fullfile(directory, subdirName, "nearRT.csv"));
@@ -89,10 +89,10 @@ low = [low, lowAll];
 DFALL = [all,highAll, mediumAll, lowAll];
 
 % 各データを検定結果付きで表示
-showData(subjects, 'PDT_RT_name_Graph.png');
+% showData(subjects, 'PDT_RT_name_Graph.png');
 
 % allのデータを表示
-showOneData(all, 'PDT_RT_All_Graph.png');
+showOneData(all, 'PDT_RT_All_Graph_Num.png');
 
 % showData(high, 'PDT_RT_High_Graph.png');
 % showData(medium, 'PDT_RT_Medium_Graph.png');
@@ -133,6 +133,7 @@ disp("MissRateのシャピロウィルク検定");
 disp(C_P);
 disp(N_P);
 disp(F_P);
+MissingRate = MissingRate .* 100;
 % クラスカルワリス検定
 % figure;
 % [subject_p,subject_tbl,subject_stats] = kruskalwallis(MissingRate, [], 'off');
@@ -144,9 +145,15 @@ disp(F_P);
 
 % ANOVA
 figure;
-p = anova1(MissingRate);
+[p,tbl,stats] = anova1(MissingRate);
 disp("MissRateのANOVA");
-disp(p);
+% disp(p);
+% disp(tbl);
+% disp(stats);
+str = ['F(', num2str(tbl{2,3}), ',', num2str(tbl{3,3}), ')=', num2str(tbl{2,5}), ', p=', num2str(p)];
+disp(str);
+eta = tbl{2,2} / tbl{4,2};
+disp("η^2=" + num2str(eta));
 meanMissRate = mean(MissingRate);
 stdMissRate = std(MissingRate);
 b = bar(meanMissRate);
@@ -158,8 +165,8 @@ errorbar(meanMissRate, stdMissRate, 'k', 'linestyle', 'none','LineWidth', 2);
 
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
 fontsize(gcf,36,'points')
-ylim([0, 0.55]);
-ylabel("見逃し率の平均");
+ylim([0, 55]);
+ylabel("見逃し率の平均[%]");
 xticklabels(["対照条件", "近接条件", "遠方条件"]);
 title('PDTの見逃し率の平均');
 
@@ -214,8 +221,8 @@ function showOneData(subject,fileName)
     x = b.XEndPoints;
     xStart = [x(1), x(1), x(2)];
     xEnd = [x(2), x(3), x(3)];
-    ytips = max(y) + 0.08;
-    yStep = 0.04;
+    ytips = max(y) + 0.1;
+    yStep = 0.05;
     C_N_label = 'n.s.';
     C_F_label = 'n.s.';
     N_F_label = 'n.s.';
@@ -246,9 +253,9 @@ function showOneData(subject,fileName)
             N_F_label = "**";
         end
 
-        C_N_label = strcat(strcat(C_N_label,' p='), string(C_N_P));
-        C_F_label = strcat(strcat(C_F_label,' p='), string(C_F_P));
-        N_F_label = strcat(strcat(N_F_label,' p='), string(N_F_P));
+        C_N_label = strcat(strcat(C_N_label,' p='), sprintf('%.2e', C_N_P));
+        C_F_label = strcat(strcat(C_F_label,' p='), sprintf('%.2e', C_F_P));
+        N_F_label = strcat(strcat(N_F_label,' p='), sprintf('%.2e', N_F_P));
 
     else
         xStart = xEnd;
@@ -276,9 +283,9 @@ function showOneData(subject,fileName)
     % グラフの装飾
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 1]);
     fontsize(gcf,36,'points')
-    title("PDTへの反応時間（中央値）");
+    title("実験1 実運転実験");
     ylabel("反応時間[s]");
-    ylim([0, 0.75]);
+    ylim([0, 0.85]);
     legend("反応時間の中央値",'四分位範囲','',''); 
     xticklabels(["対照条件", "近接条件", "遠方条件"]);
 
@@ -331,7 +338,7 @@ function showData(subjects,fileName)
     % 対照条件と近接条件
     xStart = b(1).XEndPoints;
     xEnd = b(2).XEndPoints;
-    yStep = 0.3;
+    yStep = 0.4;
     labels = strings(length(subjects),1);
     for i = 1:length(subjects)
         subject = subjects(i);
@@ -357,7 +364,7 @@ function showData(subjects,fileName)
     % 対照条件と遠方条件
     xStart = b(1).XEndPoints;
     xEnd = b(3).XEndPoints;
-    yStep = 0.4;
+    yStep = 0.5;
     labels = strings(length(subjects),1);
     for i = 1:length(subjects)
         subject = subjects(i);
@@ -383,7 +390,7 @@ function showData(subjects,fileName)
     % 近接条件と遠方条件
     xStart = b(2).XEndPoints;
     xEnd = b(3).XEndPoints;
-    yStep = 0.35;
+    yStep = 0.3;
     labels = strings(length(subjects),1);
     for i = 1:length(subjects)
         subject = subjects(i);
